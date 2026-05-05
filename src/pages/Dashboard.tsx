@@ -220,11 +220,11 @@ function MainTab({ openTrades, trades, narrative, performance }: any) {
 // ── PERFORMANCE TAB ──
 function PerformanceTab({ performance, trades }: any) {
   const today = performance?.today || {};
-  const periods = [
-    { label: 'Today',    data: performance?.today },
-    { label: 'This Week',data: null },
-    { label: 'This Month',data: null },
-  ];
+  // const periods = [
+    // { label: 'Today',    data: performance?.today },
+    // { label: 'This Week',data: null },
+    // { label: 'This Month',data: null },
+  //];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
