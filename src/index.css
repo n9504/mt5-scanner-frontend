@@ -1,0 +1,63 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #070b14;
+  --bg2:     #0c0f1a;
+  --bg3:     #111626;
+  --bg4:     #161c2e;
+  --border:  #1a1f30;
+  --border2: #252d42;
+  --muted:   #556080;
+  --amber:   #f0a500;
+  --green:   #00c97a;
+  --red:     #f04060;
+  --blue:    #4090f0;
+  --purple:  #9060f0;
+  --text:    #e8ecf4;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: opacity .15s;
+}
+.btn:hover { opacity: .85; }
+.btn-amber { background: var(--amber); color: #000; }
+.btn-green { background: var(--green); color: #000; }
+.btn-red   { background: var(--red);   color: #fff; }
+.btn-ghost { background: var(--bg4);   color: var(--text); border: 1px solid var(--border2); }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; }
+.badge-buy  { background: rgba(0,201,122,.15); color: var(--green); }
+.badge-sell { background: rgba(240,64,96,.15); color: var(--red); }
+
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); margin-bottom: 12px; }
+
+table { width: 100%; border-collapse: collapse; }
+th { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 12px; }
+tr:hover td { background: var(--bg3); }
+
+.green { color: var(--green); }
+.red   { color: var(--red); }
+.amber { color: var(--amber); }
+.muted { color: var(--muted); }
+.empty { text-align: center; color: var(--muted); padding: 24px; }
+
+input, select { background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; }
+input:focus, select:focus { outline: none; border-color: var(--amber); }
