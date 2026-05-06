@@ -49,19 +49,21 @@ export default function Login() {
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex',
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
       background: '#070b14', fontFamily: "'JetBrains Mono', monospace",
     }}>
       <style>{`
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-        * { box-sizing: border-box; }
+        @media (min-width: 768px) {
+          .auth-layout { flex-direction: row !important; }
+          .auth-left { display: flex !important; }
+          .auth-right { width: 480px !important; }
+        }
       `}</style>
 
-      {/* LEFT PANEL */}
-      <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column',
+
+      {/* LEFT PANEL - hidden on mobile */}
+      <div className="auth-left" style={{
+        flex: 1, display: 'none', flexDirection: 'column',
         justifyContent: 'center', padding: '60px 80px',
         background: 'linear-gradient(135deg, #070b14 0%, #0a1220 100%)',
         borderRight: '1px solid #1a1f30',
@@ -125,14 +127,28 @@ export default function Login() {
       </div>
 
       {/* RIGHT PANEL - AUTH FORM */}
-      <div style={{
-        width: 480, display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', padding: '60px 56px',
-        background: '#070b14',
+      <div className="auth-right" style={{
+        width: '100%', display: 'flex', flexDirection: 'column',
+        justifyContent: 'center', padding: '40px 24px',
+        background: '#070b14', maxWidth: 480, margin: '0 auto',
       }}>
-        <div style={{ marginBottom: 40 }}>
+        {/* Mobile logo */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }} className="mobile-logo">
+          <svg width="160" height="40" viewBox="0 0 180 48" fill="none">
+            <rect x="0" y="10" width="5" height="28" rx="2.5" fill="#00C97A"/>
+            <rect x="8" y="5" width="5" height="38" rx="2.5" fill="#00C97A" opacity=".7"/>
+            <rect x="16" y="0" width="5" height="48" rx="2.5" fill="#00C97A" opacity=".9"/>
+            <rect x="24" y="8" width="5" height="32" rx="2.5" fill="#F0A500"/>
+            <rect x="32" y="14" width="5" height="22" rx="2.5" fill="#00C97A" opacity=".6"/>
+            <rect x="40" y="3" width="5" height="42" rx="2.5" fill="#00C97A"/>
+            <text x="54" y="32" fontFamily="Georgia, serif" fontSize="22" fontWeight="700" fill="#E8ECF4" letterSpacing="-0.5">Trade</text>
+            <text x="108" y="32" fontFamily="Georgia, serif" fontSize="22" fontWeight="400" fill="#00C97A" letterSpacing="-0.5">Pattrnly</text>
+          </svg>
+        </div>
+
+        <div style={{ marginBottom: 32 }}>
           <h3 style={{
-            fontSize: 24, fontWeight: 700, fontFamily: 'Georgia, serif',
+            fontSize: 22, fontWeight: 700, fontFamily: 'Georgia, serif',
             color: '#E8ECF4', marginBottom: 8,
           }}>
             {mode === 'login' ? 'Welcome back' : 'Create your account'}

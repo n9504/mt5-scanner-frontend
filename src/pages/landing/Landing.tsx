@@ -269,6 +269,20 @@ export default function Landing() {
       fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
     }}>
       <style>{`
+        @media (max-width: 768px) {
+          .hero-btns { flex-direction: column !important; align-items: stretch !important; }
+          .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .features-grid { grid-template-columns: 1fr !important; }
+          .steps-grid { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+          .nav-links { display: none !important; }
+          .footer-inner { flex-direction: column !important; gap: 16px !important; text-align: center !important; }
+          .hero-title { font-size: 32px !important; }
+          .hero-desc { font-size: 14px !important; }
+          .section-pad { padding: 60px 20px !important; }
+          .nav-pad { padding: 16px 20px !important; }
+        }
+
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
