@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getTrades, getSignals, getAccounts, getPerformance, getBias } from '../api/client';
+import Journal from './journal/Journal';
 import { useAuth } from '../context/AuthContext';
 
 function formatPnl(v: number) {
@@ -81,7 +82,7 @@ export default function Dashboard() {
           <span style={{ color: 'var(--amber)', fontWeight: 700, letterSpacing: '.1em' }}>
             MT5 SCANNER
           </span>
-          {['main', 'performance', 'signals'].map(t => (
+          {['main', 'performance', 'signals', 'journal'].map(t => (
             <span key={t}
               onClick={() => setTab(t)}
               style={{
@@ -96,6 +97,20 @@ export default function Dashboard() {
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {accounts.length > 1 && (
+            <select
+              onChange={e => {
+                const acc = accounts.find((a: any) => a.id === e.target.value);
+                if (acc) setAccounts([acc, ...accounts.filter((a: any) => a.id !== acc.id)]);
+              }}
+              style={{ background: '#0c0f1a', border: '1px solid #252d42',
+                color: '#E8ECF4', padding: '4px 8px', borderRadius: 4,
+                fontSize: 11, fontFamily: 'inherit' }}>
+              {accounts.map((a: any) => (
+                <option key={a.id} value={a.id}>{a.label || a.server} ({a.currency})</option>
+              ))}
+            </select>
+          )}
           {account && (
             <span style={{ color: 'var(--muted)', fontSize: 11 }}>
               Balance: <span style={{ color: 'var(--text)' }}>
@@ -123,6 +138,7 @@ export default function Dashboard() {
             {tab === 'main' && <MainTab openTrades={openTrades} trades={trades} narrative={narrative} performance={performance} />}
             {tab === 'performance' && <PerformanceTab performance={performance} trades={trades} />}
             {tab === 'signals' && <SignalsTab signals={signals} onRefresh={loadData} />}
+            {tab === 'journal' && <Journal />}
           </>
         )}
       </div>
