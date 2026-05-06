@@ -35,19 +35,23 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      const [tradeRes, openRes, sigRes, accRes, perfRes, biasRes] = await Promise.all([
-        getTrades({ status: 'CLOSED', period: 'today' }),
-        getTrades({ status: 'OPEN' }),
-        getSignals('PENDING'),
-        getAccounts(),
-        getPerformance(),
-        getBias('S3'),
+      // Critical data — load separately so one failure doesn't block others
+      const [accRes, perfRes] = await Promise.all([
+        getAccounts().catch(() => ({ data: [] })),
+        getPerformance().catch(() => ({ data: null })),
+      ]);
+      setAccounts(accRes.data);
+      setPerformance(perfRes.data);
+
+      const [tradeRes, openRes, sigRes, biasRes] = await Promise.all([
+        getTrades({ status: 'CLOSED', period: 'today' }).catch(() => ({ data: [] })),
+        getTrades({ status: 'OPEN' }).catch(() => ({ data: [] })),
+        getSignals('PENDING').catch(() => ({ data: [] })),
+        getBias('S3').catch(() => ({ data: {} })),
       ]);
       setTrades(tradeRes.data);
       setOpenTrades(openRes.data);
       setSignals(sigRes.data);
-      setAccounts(accRes.data);
-      setPerformance(perfRes.data);
       setNarrative(biasRes.data);
     } catch (e) {
       console.error(e);
