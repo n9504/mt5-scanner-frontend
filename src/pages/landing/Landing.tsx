@@ -553,9 +553,18 @@ export default function Landing() {
           © 2026 TradePattrnly. All rights reserved.
         </div>
         <div style={{ display: 'flex', gap: 24 }}>
-          {['Privacy', 'Terms', 'Contact'].map(item => (
-            <span key={item} style={{ color: '#556080', fontSize: 11,
-              cursor: 'pointer', letterSpacing: '.06em' }}>{item}</span>
+          {[
+            { label: 'Terms', path: '/terms' },
+            { label: 'Privacy', path: '/privacy' },
+            { label: 'Refund', path: '/refund' },
+          ].map(item => (
+            <span key={item.label} onClick={() => navigate(item.path)}
+              style={{ color: '#556080', fontSize: 11,
+              cursor: 'pointer', letterSpacing: '.06em',
+              transition: 'color .2s' }}
+              onMouseEnter={e => (e.target as HTMLElement).style.color = '#E8ECF4'}
+              onMouseLeave={e => (e.target as HTMLElement).style.color = '#556080'}
+            >{item.label}</span>
           ))}
         </div>
       </footer>
