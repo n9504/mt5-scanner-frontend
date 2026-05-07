@@ -78,10 +78,12 @@ export default function Dashboard() {
         const alertRes = await api.get('/api/v1/alerts');
         setAlerts(alertRes.data || []);
       } catch(e) {}
-      // Check if setup needed - only show once per session
+      // Check if setup needed - localStorage is the gate
       const setupSeen = localStorage.getItem('setup_seen');
-      if (accRes.data?.length && !accRes.data[0].setup_complete && !setupSeen) {
+      if (!setupSeen && accRes.data?.length && !accRes.data[0].setup_complete) {
         setShowSetup(true);
+      } else if (setupSeen) {
+        setShowSetup(false);
       }
     } catch (e) {
       console.error(e);
@@ -171,6 +173,7 @@ export default function Dashboard() {
             onComplete={() => {
               localStorage.setItem('setup_seen', '1');
               setShowSetup(false);
+              loadData();
             }}
           />
         )}
