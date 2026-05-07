@@ -36,13 +36,13 @@ function Bar({ label, wins, losses, pnl }: any) {
 export default function Reports() {
   const [trades,  setTrades]  = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [period,  setPeriod]  = useState('month');
+  const [period,  setPeriod]  = useState('all');
 
   useEffect(() => {
     getTrades({ status:'CLOSED', period }).then(r => {
       setTrades(r.data || []);
     }).catch(()=>{}).finally(()=>setLoading(false));
-  }, [period]);
+  }, [period]); // eslint-disable-line
 
   // Compute stats
   const wins    = trades.filter(t=>(t.execution_outcome||'').startsWith('WIN'));

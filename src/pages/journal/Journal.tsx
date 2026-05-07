@@ -417,10 +417,14 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                 <div>
                   {!trade.screenshot_entry && !trade.screenshot_h1_entry ? (
                     <div style={{ textAlign:'center', color:'#556080', padding:'40px 0' }}>
-                      <div style={{ fontSize:24, marginBottom:8 }}>📸</div>
-                      <div>No charts captured yet</div>
+                      <div style={{ fontSize:24, marginBottom:8 }}>
+                        {trade.status === 'OPEN' ? '⏳' : '📸'}
+                      </div>
+                      <div>{trade.status === 'OPEN' ? 'Entry chart uploading...' : 'No charts captured yet'}</div>
                       <div style={{ fontSize:11, marginTop:4 }}>
-                        Charts are captured automatically when EA is active
+                        {trade.status === 'OPEN'
+                          ? 'Entry chart uploads within 30 seconds of trade open'
+                          : 'Charts are captured automatically when EA is active'}
                       </div>
                     </div>
                   ) : (
@@ -546,20 +550,39 @@ export default function Journal() {
   const [filterTag,     setFilterTag]     = useState('');
   const [filterResult,  setFilterResult]  = useState('all');
 
-  const load = async () => {
+  const load = async (force=false) => {
+    const cacheKey = `journal_trades_${period}`;
+    // Use cache for speed unless forced
+    if (!force) {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          setTrades(JSON.parse(cached));
+          setLoading(false);
+          // Refresh in background
+          loadFresh(cacheKey);
+          return;
+        } catch(e) {}
+      }
+    }
     setLoading(true);
+    await loadFresh(cacheKey);
+    setLoading(false);
+  };
+
+  const loadFresh = async (cacheKey: string) => {
     try {
       const [closedR, openR] = await Promise.all([
         getTrades({ status:'CLOSED', period }).catch(() => ({ data:[] })),
         getTrades({ status:'OPEN' }).catch(() => ({ data:[] })),
       ]);
-      // Open trades first, then closed
-      setTrades([...(openR.data||[]), ...(closedR.data||[])]);
+      const all = [...(openR.data||[]), ...(closedR.data||[])];
+      setTrades(all);
+      sessionStorage.setItem(cacheKey, JSON.stringify(all));
     } catch(e) {}
-    setLoading(false);
   };
 
-  useEffect(() => { load(); }, [period]); // eslint-disable-line
+  useEffect(() => { setLoading(true); load(); }, [period]); // eslint-disable-line
 
   const filtered = trades.filter(t => {
     if (filterSymbol && t.symbol !== filterSymbol) return false;
