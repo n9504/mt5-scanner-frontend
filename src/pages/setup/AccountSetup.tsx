@@ -7,7 +7,7 @@ export default function AccountSetup({ accountId, onComplete }: { accountId: str
   const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState('');
   const [form,    setForm]    = useState({
-    timezone: 'UTC',
+    timezone: 'UTC+00:00',
     daily_profit_target: '', daily_loss_cap: '', risk_per_trade_pct: '1',
     prop_max_loss_per_trade: '', prop_daily_max_loss: '',
     prop_5day_max_loss: '', prop_profit_cap: '', prop_challenge_target: '',
@@ -126,11 +126,37 @@ export default function AccountSetup({ accountId, onComplete }: { accountId: str
                   style={{ width:'100%', padding:'9px 12px', background:'#111626',
                     border:'1px solid #1a1f30', borderRadius:6, color:'#E8ECF4',
                     fontSize:12, fontFamily:'inherit', outline:'none' }}>
-                  {[['UTC','UTC'],['Australia/Sydney','Sydney (AEST)'],
-                    ['Europe/London','London (GMT)'],['America/New_York','New York (EST)'],
-                    ['Asia/Tokyo','Tokyo (JST)'],['Asia/Singapore','Singapore (SGT)'],
-                    ['Europe/Berlin','Frankfurt (CET)'],
-                  ].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                  <option value="UTC+00:00">UTC+00:00 (London)</option>
+                  <option value="UTC+01:00">UTC+01:00 (Paris, Berlin)</option>
+                  <option value="UTC+02:00">UTC+02:00 (Cairo, Johannesburg)</option>
+                  <option value="UTC+03:00">UTC+03:00 (Moscow, Riyadh)</option>
+                  <option value="UTC+03:30">UTC+03:30 (Tehran)</option>
+                  <option value="UTC+04:00">UTC+04:00 (Dubai)</option>
+                  <option value="UTC+04:30">UTC+04:30 (Kabul)</option>
+                  <option value="UTC+05:00">UTC+05:00 (Karachi)</option>
+                  <option value="UTC+05:30">UTC+05:30 (Mumbai)</option>
+                  <option value="UTC+05:45">UTC+05:45 (Kathmandu)</option>
+                  <option value="UTC+06:00">UTC+06:00 (Dhaka)</option>
+                  <option value="UTC+06:30">UTC+06:30 (Yangon)</option>
+                  <option value="UTC+07:00">UTC+07:00 (Bangkok, Jakarta)</option>
+                  <option value="UTC+08:00">UTC+08:00 (Singapore, HK, Perth)</option>
+                  <option value="UTC+09:00">UTC+09:00 (Tokyo, Seoul)</option>
+                  <option value="UTC+09:30">UTC+09:30 (Adelaide)</option>
+                  <option value="UTC+10:00">UTC+10:00 (Sydney, Brisbane)</option>
+                  <option value="UTC+11:00">UTC+11:00 (Solomon Islands)</option>
+                  <option value="UTC+12:00">UTC+12:00 (Auckland)</option>
+                  <option value="UTC-01:00">UTC-01:00 (Azores)</option>
+                  <option value="UTC-02:00">UTC-02:00 (South Georgia)</option>
+                  <option value="UTC-03:00">UTC-03:00 (Brasilia)</option>
+                  <option value="UTC-04:00">UTC-04:00 (Halifax)</option>
+                  <option value="UTC-05:00">UTC-05:00 (New York)</option>
+                  <option value="UTC-06:00">UTC-06:00 (Chicago)</option>
+                  <option value="UTC-07:00">UTC-07:00 (Denver)</option>
+                  <option value="UTC-08:00">UTC-08:00 (Los Angeles)</option>
+                  <option value="UTC-09:00">UTC-09:00 (Alaska)</option>
+                  <option value="UTC-10:00">UTC-10:00 (Hawaii)</option>
+                  <option value="UTC-11:00">UTC-11:00 (American Samoa)</option>
+                  <option value="UTC-12:00">UTC-12:00 (Baker Island)</option>
                 </select>
               </div>
 

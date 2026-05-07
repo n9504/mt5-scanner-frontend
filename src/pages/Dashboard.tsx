@@ -5,6 +5,8 @@ import Journal from './journal/Journal';
 import Insights from './insights/Insights';
 import Settings from './settings/Settings';
 import AccountSetup from './setup/AccountSetup';
+import Bias from './bias/Bias';
+import Reports from './reports/Reports';
 import { useAuth } from '../context/AuthContext';
 
 const Logo = () => (
@@ -111,7 +113,7 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Logo />
-          {['main', 'performance', 'signals', 'journal', 'insights', 'settings'].map(t => (
+          {(['main', 'performance', 'journal', 'bias', 'reports', 'insights', 'settings'] as const).map(t => (
             <span key={t}
               onClick={() => setTab(t)}
               style={{
@@ -187,6 +189,8 @@ export default function Dashboard() {
             {tab === 'journal'   && <Journal />}
             {tab === 'insights'  && <Insights />}
             {tab === 'settings'  && <Settings />}
+            {tab === 'bias'      && <Bias />}
+            {tab === 'reports'   && <Reports />}
             {/* Account setup wizard - show if first account not setup */}
             {!loading && accounts.length > 0 && !accounts[0].setup_complete && (
               <AccountSetup accountId={accounts[0]?.id || ''} onComplete={() => { localStorage.setItem('setup_seen','1');

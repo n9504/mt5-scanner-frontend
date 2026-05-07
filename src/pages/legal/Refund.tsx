@@ -36,7 +36,12 @@ export default function Refund() {
     <div style={s.page}>
       <nav style={s.nav}>
         <div onClick={() => navigate('/')} style={{ cursor: 'pointer' }}><Logo /></div>
-        <span style={{ fontSize: 11, color: '#556080' }}>Legal</span>
+        <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+          <span style={{ fontSize: 11, color: '#556080' }}>Legal</span>
+          <button onClick={() => navigate('/')} style={{
+            padding:'6px 14px', background:'transparent', border:'1px solid #252d42',
+            borderRadius:4, color:'#556080', fontSize:11, cursor:'pointer' }}>← Home</button>
+        </div>
       </nav>
       <div style={s.container}>
         <h1 style={s.h1}>Cancellation Policy</h1>
