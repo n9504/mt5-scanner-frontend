@@ -78,8 +78,9 @@ export default function Dashboard() {
         const alertRes = await api.get('/api/v1/alerts');
         setAlerts(alertRes.data || []);
       } catch(e) {}
-      // Check if setup needed
-      if (accRes.data?.length && !accRes.data[0].setup_complete) {
+      // Check if setup needed - only show once per session
+      const setupSeen = localStorage.getItem('setup_seen');
+      if (accRes.data?.length && !accRes.data[0].setup_complete && !setupSeen) {
         setShowSetup(true);
       }
     } catch (e) {
@@ -167,7 +168,10 @@ export default function Dashboard() {
         {showSetup && accounts[0] && (
           <AccountSetup
             accountId={accounts[0]?.id || ''}
-            onComplete={() => { setShowSetup(false); loadData(); }}
+            onComplete={() => {
+              localStorage.setItem('setup_seen', '1');
+              setShowSetup(false);
+            }}
           />
         )}
         {loading ? (
@@ -182,7 +186,7 @@ export default function Dashboard() {
             {tab === 'settings'  && <Settings />}
             {/* Account setup wizard - show if first account not setup */}
             {!loading && accounts.length > 0 && !accounts[0].setup_complete && (
-              <AccountSetup accountId={accounts[0]?.id || ''} onComplete={() => {
+              <AccountSetup accountId={accounts[0]?.id || ''} onComplete={() => { localStorage.setItem('setup_seen','1');
                 const updated = [...accounts];
                 updated[0] = { ...updated[0], setup_complete: true };
                 setAccounts(updated);
