@@ -118,14 +118,22 @@ function TradeDetail({ trade, onUpdate }: { trade: any, onUpdate: (t: any) => vo
   const runAnalysis = async () => {
     setAnalysing(true);
     try {
-      const r = await api.post(`/api/v1/trades/${trade.id}/analyse`);
-      if (r.data.tags) {
-        const newTags = Array.from(new Set([...tags, ...(r.data.tags as string[])]));
-        setTags(newTags);
-        onUpdate({ ...trade, tags: newTags, ai_analysis: r.data.analysis });
-      }
-    } catch(e) {}
-    setAnalysing(false);
+      await api.post(`/api/v1/trades/${trade.id}/analyse`);
+      // Poll for result - analysis runs in background
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        try {
+          const fresh = await api.get(`/api/v1/trades?status=CLOSED&period=all`);
+          const updated = (fresh.data || []).find((t: any) => t.id === trade.id);
+          if (updated?.ai_analysis || attempts > 10) {
+            clearInterval(poll);
+            if (updated) onUpdate(updated);
+            setAnalysing(false);
+          }
+        } catch(e) { clearInterval(poll); setAnalysing(false); }
+      }, 3000);
+    } catch(e) { setAnalysing(false); }
   };
 
 
@@ -354,6 +362,12 @@ export default function Journal() {
   };
 
   useEffect(() => { load(); }, [period]); // eslint-disable-line
+
+  // Poll every 30s to pick up AI-generated tags
+  useEffect(() => {
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
+  }, [period]); // eslint-disable-line
 
   const filtered = trades.filter(t => {
     if (filterSymbol && t.symbol !== filterSymbol) return false;
