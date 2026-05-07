@@ -214,14 +214,21 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
           </div>
         </td>
         <td style={{ padding:'12px 16px', textAlign:'center' }}>
-          <span style={{
-            padding:'3px 10px', borderRadius:4, fontSize:10, fontWeight:700,
-            background: win ? 'rgba(0,201,122,.12)' : 'rgba(240,64,96,.12)',
-            color: win ? '#00C97A' : '#f04060',
-          }}>
-            {(trade.execution_outcome||'').includes('TRAIL') ? 'TRAIL' :
-             win ? 'WIN' : 'LOSS'}
-          </span>
+          {trade.status === 'OPEN' ? (
+            <span style={{ padding:'3px 10px', borderRadius:4, fontSize:10, fontWeight:700,
+              background:'rgba(240,160,0,.12)', color:'#F0A500', animation:'pulse 2s infinite' }}>
+              OPEN
+            </span>
+          ) : (
+            <span style={{
+              padding:'3px 10px', borderRadius:4, fontSize:10, fontWeight:700,
+              background: win ? 'rgba(0,201,122,.12)' : 'rgba(240,64,96,.12)',
+              color: win ? '#00C97A' : '#f04060',
+            }}>
+              {(trade.execution_outcome||'').includes('TRAIL') ? 'TRAIL' :
+               win ? 'WIN' : 'LOSS'}
+            </span>
+          )}
         </td>
       </tr>
 
@@ -269,27 +276,75 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                       ))}
                     </div>
 
-                    {/* AI Analysis */}
-                    {trade.ai_analysis ? (
-                      <div style={{ background:'rgba(144,96,240,.05)',
-                        border:'1px solid rgba(144,96,240,.15)',
-                        borderRadius:6, padding:'14px 16px', marginBottom:12 }}>
-                        <div style={{ fontSize:10, color:'#9060f0', textTransform:'uppercase',
-                          letterSpacing:'.08em', marginBottom:8 }}>🧠 AI Analysis</div>
-                        <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7 }}>
-                          {trade.ai_analysis}
+                    {/* Entry Analysis */}
+                    {(() => {
+                      let ea: any = null;
+                      try { ea = trade.entry_analysis ? JSON.parse(trade.entry_analysis) : null; } catch(e) {}
+                      return ea ? (
+                        <div style={{ background:'rgba(0,201,122,.04)',
+                          border:'1px solid rgba(0,201,122,.15)',
+                          borderRadius:6, padding:'14px 16px', marginBottom:10 }}>
+                          <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
+                            letterSpacing:'.08em', marginBottom:10, display:'flex',
+                            justifyContent:'space-between', alignItems:'center' }}>
+                            <span>📊 Entry Analysis</span>
+                            <div style={{ display:'flex', gap:8 }}>
+                              <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
+                                background:'rgba(0,201,122,.12)', color:'#00C97A' }}>
+                                Score: {ea.entry_score}/10
+                              </span>
+                              <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
+                                background:'rgba(64,144,240,.12)', color:'#4090f0' }}>
+                                TP: {ea.tp_probability}%
+                              </span>
+                              <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
+                                background:'rgba(240,64,96,.12)', color:'#f04060' }}>
+                                SL: {ea.sl_probability}%
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>{ea.entry_reasoning}</div>
+                          {ea.key_level && <div style={{ fontSize:11, color:'#F0A500' }}>📍 Key level: {ea.key_level}</div>}
+                          {ea.watch_for && <div style={{ fontSize:11, color:'#556080', marginTop:4 }}>👀 Watch for: {ea.watch_for}</div>}
                         </div>
-                      </div>
-                    ) : (
-                      <button onClick={analyse} disabled={analysing} style={{
-                        width:'100%', padding:'10px', background:'rgba(144,96,240,.08)',
-                        border:'1px solid rgba(144,96,240,.2)', borderRadius:6,
-                        color:'#9060f0', fontSize:11, fontWeight:700, cursor:'pointer',
-                        letterSpacing:'.06em', marginBottom:12,
-                      }}>
-                        {analysing ? '🧠 Analysing...' : '🧠 Run AI Analysis'}
-                      </button>
-                    )}
+                      ) : null;
+                    })()}
+
+                    {/* Exit Analysis */}
+                    {(() => {
+                      let xa: any = null;
+                      try { xa = trade.exit_analysis ? JSON.parse(trade.exit_analysis) : null; } catch(e) {}
+                      return xa ? (
+                        <div style={{ background:'rgba(144,96,240,.04)',
+                          border:'1px solid rgba(144,96,240,.15)',
+                          borderRadius:6, padding:'14px 16px', marginBottom:10 }}>
+                          <div style={{ fontSize:10, color:'#9060f0', textTransform:'uppercase' as const,
+                            letterSpacing:'.08em', marginBottom:10, display:'flex',
+                            justifyContent:'space-between', alignItems:'center' }}>
+                            <span>🧠 Exit Analysis</span>
+                            <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
+                              background:'rgba(144,96,240,.12)', color:'#9060f0' }}>
+                              Exit score: {xa.exit_score}/10
+                            </span>
+                          </div>
+                          <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>{xa.overall_analysis}</div>
+                          {xa.what_went_right && <div style={{ fontSize:11, color:'#00C97A', marginBottom:4 }}>✓ {xa.what_went_right}</div>}
+                          {xa.what_went_wrong && xa.what_went_wrong !== 'Nothing significant' && (
+                            <div style={{ fontSize:11, color:'#f04060', marginBottom:4 }}>✗ {xa.what_went_wrong}</div>
+                          )}
+                          {xa.lesson && <div style={{ fontSize:11, color:'#F0A500', marginTop:4 }}>💡 {xa.lesson}</div>}
+                        </div>
+                      ) : (
+                        <button onClick={analyse} disabled={analysing} style={{
+                          width:'100%', padding:'10px', background:'rgba(144,96,240,.08)',
+                          border:'1px solid rgba(144,96,240,.2)', borderRadius:6,
+                          color:'#9060f0', fontSize:11, fontWeight:700, cursor:'pointer',
+                          letterSpacing:'.06em', marginBottom:10,
+                        }}>
+                          {analysing ? '🧠 Analysing...' : '🧠 Run AI Analysis'}
+                        </button>
+                      );
+                    })()}
 
                     {/* Post-exit */}
                     {trade.post_exit_tracked && exitQ && (
@@ -494,8 +549,12 @@ export default function Journal() {
   const load = async () => {
     setLoading(true);
     try {
-      const r = await getTrades({ status:'CLOSED', period });
-      setTrades(r.data || []);
+      const [closedR, openR] = await Promise.all([
+        getTrades({ status:'CLOSED', period }).catch(() => ({ data:[] })),
+        getTrades({ status:'OPEN' }).catch(() => ({ data:[] })),
+      ]);
+      // Open trades first, then closed
+      setTrades([...(openR.data||[]), ...(closedR.data||[])]);
     } catch(e) {}
     setLoading(false);
   };
