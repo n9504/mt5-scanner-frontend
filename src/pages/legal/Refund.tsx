@@ -39,40 +39,37 @@ export default function Refund() {
         <span style={{ fontSize: 11, color: '#556080' }}>Legal</span>
       </nav>
       <div style={s.container}>
-        <h1 style={s.h1}>Refund Policy</h1>
+        <h1 style={s.h1}>Cancellation Policy</h1>
         <p style={s.date}>Last updated: May 2026</p>
 
         <div style={s.highlight}>
           <p style={{ ...s.p, color: '#00C97A', marginBottom: 0 }}>
-            <strong>Summary:</strong> We offer a 7-day money-back guarantee on all paid plans.
-            No questions asked.
+            <strong>Simple policy:</strong> Cancel anytime. No lock-in. No questions asked.
+            Your subscription continues until the end of the current billing period.
           </p>
         </div>
 
-        <h2 style={s.h2}>1. 7-Day Money-Back Guarantee</h2>
-        <p style={s.p}>If you are not satisfied with TradePattrnly for any reason, you may request a full refund within 7 days of your initial purchase. This applies to all paid plans — Pro, Elite, and Prop.</p>
-        <p style={s.p}>To request a refund within the 7-day window, contact us at support@tradepattrnly.com with your account email and we will process your refund within 5 business days.</p>
+        <h2 style={s.h2}>1. Cancel Anytime</h2>
+        <p style={s.p}>You may cancel your TradePattrnly subscription at any time with no penalty. There are no cancellation fees, no minimum commitment periods, and no questions asked.</p>
 
-        <h2 style={s.h2}>2. Subscription Cancellations</h2>
-        <p style={s.p}>You may cancel your subscription at any time. When you cancel:</p>
-        <p style={s.p}>Your subscription remains active until the end of the current billing period. You will not be charged again after cancellation. No partial refunds are issued for unused days in the current billing period after the 7-day guarantee window.</p>
+        <h2 style={s.h2}>2. What Happens When You Cancel</h2>
+        <p style={s.p}>When you cancel your subscription:</p>
+        <p style={s.p}>— Your subscription remains active until the end of the current billing period.</p>
+        <p style={s.p}>— You will not be charged again after cancellation.</p>
+        <p style={s.p}>— You retain full access to your plan features until the period ends.</p>
+        <p style={s.p}>— Your trade data and journal are preserved for 90 days after cancellation.</p>
 
-        <h2 style={s.h2}>3. Eligibility</h2>
-        <p style={s.p}>Refunds are available for:</p>
-        <p style={s.p}>— First-time purchases within 7 days of the initial charge.</p>
-        <p style={s.p}>Refunds are not available for:</p>
-        <p style={s.p}>— Renewal charges after the initial billing period. — Accounts found to be in violation of our Terms of Service. — Requests made after the 7-day window has passed.</p>
+        <h2 style={s.h2}>3. No Refunds</h2>
+        <p style={s.p}>We do not offer refunds for partial billing periods. Given our flexible month-to-month structure with no lock-in, all charges are final. We encourage you to use the Free plan to evaluate the platform before upgrading.</p>
 
-        <h2 style={s.h2}>4. Free Plan</h2>
-        <p style={s.p}>The Free plan has no charges and therefore no refund policy applies.</p>
+        <h2 style={s.h2}>4. How to Cancel</h2>
+        <p style={s.p}>You can cancel your subscription at any time from your account Settings page. Cancellation takes effect immediately — you will not be billed again but retain access until the period ends.</p>
 
-        <h2 style={s.h2}>5. How to Request a Refund</h2>
-        <p style={s.p}>Email us at <strong style={{ color: '#E8ECF4' }}>support@tradepattrnly.com</strong> with:</p>
-        <p style={s.p}>— Your account email address — The date of purchase — Reason for refund (optional)</p>
-        <p style={s.p}>We will confirm your refund request within 1 business day and process the refund within 5 business days.</p>
+        <h2 style={s.h2}>5. Downgrading</h2>
+        <p style={s.p}>You may downgrade to a lower tier or the Free plan at any time. The downgrade takes effect at the start of the next billing period.</p>
 
         <h2 style={s.h2}>6. Contact</h2>
-        <p style={s.p}>For refund questions, contact us at support@tradepattrnly.com</p>
+        <p style={s.p}>For cancellation assistance, contact us at support@tradepattrnly.com</p>
       </div>
     </div>
   );

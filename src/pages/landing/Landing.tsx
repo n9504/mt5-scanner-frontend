@@ -309,7 +309,7 @@ export default function Landing() {
       }}>
         <Logo size={28} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          {['Features', 'Pricing', 'Journal'].map(item => (
+          {['Features', 'Pricing', 'Journal', 'About'].map(item => (
             <a key={item} href={`#${item.toLowerCase()}`} style={{
               color: '#556080', fontSize: 12, textTransform: 'uppercase',
               letterSpacing: '.08em', textDecoration: 'none', transition: 'color 0.2s',
@@ -543,6 +543,43 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ABOUT SECTION */}
+      <section id="about" style={{
+        padding: '80px 48px', borderTop: '1px solid #1a1f30',
+        background: '#070b14',
+      }}>
+        <div style={{ maxWidth: 900, margin: '0 auto',
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60 }}>
+          <div>
+            <div style={{ fontSize: 11, color: '#00C97A', textTransform: 'uppercase',
+              letterSpacing: '.12em', marginBottom: 12 }}>About</div>
+            <h2 style={{ fontSize: 28, fontWeight: 700, fontFamily: 'Georgia,serif',
+              marginBottom: 16, lineHeight: 1.3 }}>Built by traders, for traders</h2>
+            <p style={{ color: '#556080', fontSize: 13, lineHeight: 1.8 }}>
+              TradePattrnly was built out of frustration with expensive, complex trading journals
+              that don't actually help you improve. We combined automatic trade tracking with
+              genuine AI analysis to give you the insights that matter.
+            </p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[
+              { icon: '🔒', title: 'Your data stays yours', desc: 'We never sell or share your trading data. Row-level security means only you can see your trades.' },
+              { icon: '💸', title: 'Cancel anytime', desc: 'No lock-in, no minimum commitment. Cancel with one click and keep your data for 90 days.' },
+              { icon: '🌏', title: 'Works globally', desc: 'Supports MT4 and MT5, all brokers, all currencies. Timezone-aware for traders worldwide.' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: 14 }}>
+                <div style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>{item.icon}</div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#E8ECF4',
+                    marginBottom: 4 }}>{item.title}</div>
+                  <div style={{ fontSize: 12, color: '#556080', lineHeight: 1.6 }}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer style={{
         padding: '40px 48px', borderTop: '1px solid #1a1f30',
@@ -556,7 +593,7 @@ export default function Landing() {
           {[
             { label: 'Terms', path: '/terms' },
             { label: 'Privacy', path: '/privacy' },
-            { label: 'Refund', path: '/refund' },
+            { label: 'Cancellation', path: '/refund' },
           ].map(item => (
             <span key={item.label} onClick={() => navigate(item.path)}
               style={{ color: '#556080', fontSize: 11,

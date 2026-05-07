@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { getTrades, getSignals, getAccounts, getPerformance, getBias } from '../api/client';
+import api from '../api/client';
 import Journal from './journal/Journal';
+import Insights from './insights/Insights';
+import Settings from './settings/Settings';
+import AccountSetup from './setup/AccountSetup';
 import { useAuth } from '../context/AuthContext';
 
 const Logo = () => (
@@ -46,6 +50,8 @@ export default function Dashboard() {
   const [performance, setPerformance] = useState<any>(null);
   const [narrative,   setNarrative]   = useState<any>({});
   const [loading,     setLoading]     = useState(true);
+  const [alerts,      setAlerts]      = useState<any[]>([]);
+  const [showSetup,   setShowSetup]   = useState(false);
 
   const loadData = async () => {
     try {
@@ -67,6 +73,15 @@ export default function Dashboard() {
       setOpenTrades(openRes.data);
       setSignals(sigRes.data);
       setNarrative(biasRes.data);
+      // Load alerts
+      try {
+        const alertRes = await api.get('/api/v1/alerts');
+        setAlerts(alertRes.data || []);
+      } catch(e) {}
+      // Check if setup needed
+      if (accRes.data?.length && !accRes.data[0].setup_complete) {
+        setShowSetup(true);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -93,7 +108,7 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Logo />
-          {['main', 'performance', 'signals', 'journal'].map(t => (
+          {['main', 'performance', 'signals', 'journal', 'insights', 'settings'].map(t => (
             <span key={t}
               onClick={() => setTab(t)}
               style={{
@@ -134,6 +149,13 @@ export default function Dashboard() {
               {formatPnl(todayPnl)}
             </span>
           </span>
+          {alerts.length > 0 && (
+            <span style={{ padding:'3px 8px', borderRadius:4, fontSize:10, fontWeight:700,
+              background:'rgba(240,64,96,.15)', color:'#f04060', cursor:'pointer' }}
+              onClick={() => setTab('main')}>
+              ⚠ {alerts.length} alert{alerts.length>1?'s':''}
+            </span>
+          )}
           <span style={{ color: 'var(--muted)', fontSize: 11 }}>{tenant?.email}</span>
           <button className="btn btn-ghost" onClick={logout} style={{ padding: '4px 10px' }}>
             Logout
@@ -142,6 +164,12 @@ export default function Dashboard() {
       </div>
 
       <div style={{ padding: '16px 20px' }}>
+        {showSetup && accounts[0] && (
+          <AccountSetup
+            accountId={accounts[0]?.id || ''}
+            onComplete={() => { setShowSetup(false); loadData(); }}
+          />
+        )}
         {loading ? (
           <div className="empty">Loading...</div>
         ) : (
@@ -149,7 +177,17 @@ export default function Dashboard() {
             {tab === 'main' && <MainTab openTrades={openTrades} trades={trades} narrative={narrative} performance={performance} />}
             {tab === 'performance' && <PerformanceTab performance={performance} trades={trades} />}
             {tab === 'signals' && <SignalsTab signals={signals} onRefresh={loadData} />}
-            {tab === 'journal' && <Journal />}
+            {tab === 'journal'   && <Journal />}
+            {tab === 'insights'  && <Insights />}
+            {tab === 'settings'  && <Settings />}
+            {/* Account setup wizard - show if first account not setup */}
+            {!loading && accounts.length > 0 && !accounts[0].setup_complete && (
+              <AccountSetup accountId={accounts[0]?.id || ''} onComplete={() => {
+                const updated = [...accounts];
+                updated[0] = { ...updated[0], setup_complete: true };
+                setAccounts(updated);
+              }} />
+            )}
           </>
         )}
       </div>
