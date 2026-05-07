@@ -281,33 +281,64 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                       let ea: any = null;
                       try { ea = trade.entry_analysis ? JSON.parse(trade.entry_analysis) : null; } catch(e) {}
                       return ea ? (
-                        <div style={{ background:'rgba(0,201,122,.04)',
-                          border:'1px solid rgba(0,201,122,.15)',
-                          borderRadius:6, padding:'14px 16px', marginBottom:10 }}>
-                          <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
-                            letterSpacing:'.08em', marginBottom:10, display:'flex',
-                            justifyContent:'space-between', alignItems:'center' }}>
-                            <span>📊 Entry Analysis</span>
-                            <div style={{ display:'flex', gap:8 }}>
-                              <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
-                                background:'rgba(0,201,122,.12)', color:'#00C97A' }}>
-                                Score: {ea.entry_score}/10
-                              </span>
-                              <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
-                                background:'rgba(64,144,240,.12)', color:'#4090f0' }}>
-                                TP: {ea.tp_probability}%
-                              </span>
-                              <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
-                                background:'rgba(240,64,96,.12)', color:'#f04060' }}>
-                                SL: {ea.sl_probability}%
-                              </span>
+                        <div style={{ marginBottom:12 }}>
+                          {/* Score + probabilities */}
+                          <div style={{ background:'rgba(0,201,122,.04)', border:'1px solid rgba(0,201,122,.15)',
+                            borderRadius:6, padding:'14px 16px', marginBottom:8 }}>
+                            <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
+                              letterSpacing:'.08em', marginBottom:12 }}>📊 Entry Analysis</div>
+                            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:12 }}>
+                              <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
+                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>ENTRY SCORE</div>
+                                <div style={{ fontSize:22, fontWeight:700, color: ea.entry_score>=7?'#00C97A':ea.entry_score>=5?'#F0A500':'#f04060',
+                                  fontFamily:'Georgia,serif' }}>{ea.entry_score}/10</div>
+                              </div>
+                              <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
+                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>TP PROBABILITY</div>
+                                <div style={{ fontSize:22, fontWeight:700, color:'#00C97A', fontFamily:'Georgia,serif' }}>{ea.tp_probability}%</div>
+                              </div>
+                              <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
+                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>SL PROBABILITY</div>
+                                <div style={{ fontSize:22, fontWeight:700, color:'#f04060', fontFamily:'Georgia,serif' }}>{ea.sl_probability}%</div>
+                              </div>
                             </div>
+                            {ea.entry_reasoning && (
+                              <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>{ea.entry_reasoning}</div>
+                            )}
+                            {ea.key_level && <div style={{ fontSize:11, color:'#F0A500', marginBottom:4 }}>📍 Key level: {ea.key_level}</div>}
+                            {ea.watch_for && <div style={{ fontSize:11, color:'#556080' }}>👀 {ea.watch_for}</div>}
                           </div>
-                          <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>{ea.entry_reasoning}</div>
-                          {ea.key_level && <div style={{ fontSize:11, color:'#F0A500' }}>📍 Key level: {ea.key_level}</div>}
-                          {ea.watch_for && <div style={{ fontSize:11, color:'#556080', marginTop:4 }}>👀 Watch for: {ea.watch_for}</div>}
+
+                          {/* Simulated balance */}
+                          {(ea.sim_tp_pnl !== undefined || ea.sim_sl_pnl !== undefined) && (
+                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
+                              <div style={{ background:'rgba(0,201,122,.04)', border:'1px solid rgba(0,201,122,.15)',
+                                borderRadius:5, padding:'10px 14px' }}>
+                                <div style={{ fontSize:9, color:'#556080', textTransform:'uppercase' as const,
+                                  letterSpacing:'.06em', marginBottom:4 }}>If all {ea.open_count || 1} open trades hit TP</div>
+                                <div style={{ fontSize:16, fontWeight:700, color:'#00C97A' }}>
+                                  {ea.sim_tp_pnl >= 0 ? '+' : ''}{ea.sim_tp_pnl?.toFixed(2) || '—'}
+                                </div>
+                              </div>
+                              <div style={{ background:'rgba(240,64,96,.04)', border:'1px solid rgba(240,64,96,.15)',
+                                borderRadius:5, padding:'10px 14px' }}>
+                                <div style={{ fontSize:9, color:'#556080', textTransform:'uppercase' as const,
+                                  letterSpacing:'.06em', marginBottom:4 }}>If all open trades hit SL</div>
+                                <div style={{ fontSize:16, fontWeight:700, color:'#f04060' }}>
+                                  {ea.sim_sl_pnl >= 0 ? '+' : ''}{ea.sim_sl_pnl?.toFixed(2) || '—'}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      ) : null;
+                      ) : (
+                        trade.status === 'OPEN' ? (
+                          <div style={{ background:'rgba(64,144,240,.05)', border:'1px solid rgba(64,144,240,.15)',
+                            borderRadius:6, padding:'12px 14px', marginBottom:10, fontSize:12, color:'#4090f0' }}>
+                            ⏳ Entry analysis running... Screenshots are being processed by AI.
+                          </div>
+                        ) : null
+                      );
                     })()}
 
                     {/* Exit Analysis */}
