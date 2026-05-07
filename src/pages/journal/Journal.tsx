@@ -185,7 +185,7 @@ function TradeDetail({ trade, onUpdate }: { trade: any, onUpdate: (t: any) => vo
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 9, color: '#556080', textTransform: 'uppercase',
                 letterSpacing: '.08em', marginBottom: 6 }}>Entry Chart</div>
-              <img src={trade.screenshot_entry} alt="Entry"
+              <img src={trade.screenshot_entry.startsWith('data:') ? trade.screenshot_entry : `data:image/png;base64,${trade.screenshot_entry}`} alt="Entry"
                 style={{ width: '100%', borderRadius: 6, border: '1px solid #1a1f30' }}/>
             </div>
           )}
@@ -193,10 +193,75 @@ function TradeDetail({ trade, onUpdate }: { trade: any, onUpdate: (t: any) => vo
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 9, color: '#556080', textTransform: 'uppercase',
                 letterSpacing: '.08em', marginBottom: 6 }}>Exit Chart</div>
-              <img src={trade.screenshot_exit} alt="Exit"
+              <img src={trade.screenshot_exit.startsWith('data:') ? trade.screenshot_exit : `data:image/png;base64,${trade.screenshot_exit}`} alt="Exit"
                 style={{ width: '100%', borderRadius: 6, border: '1px solid #1a1f30' }}/>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Post-exit quality */}
+      {trade.post_exit_tracked && trade.exit_quality && (
+        <div style={{
+          background: trade.exit_quality === 'EARLY' ? 'rgba(240,160,0,0.05)' :
+                      trade.exit_quality === 'PERFECT' ? 'rgba(0,201,122,0.05)' :
+                      'rgba(64,144,240,0.05)',
+          border: `1px solid ${trade.exit_quality === 'EARLY' ? 'rgba(240,160,0,0.2)' :
+                               trade.exit_quality === 'PERFECT' ? 'rgba(0,201,122,0.2)' :
+                               'rgba(64,144,240,0.2)'}`,
+          borderRadius: 6, padding: '12px 14px', marginBottom: 16,
+        }}>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.08em',
+            marginBottom: 8, color: trade.exit_quality === 'EARLY' ? '#F0A500' :
+            trade.exit_quality === 'PERFECT' ? '#00C97A' : '#4090f0' }}>
+            Exit Quality — {trade.exit_quality}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ background: '#111626', borderRadius: 6, padding: '8px 12px' }}>
+              <div style={{ fontSize: 9, color: '#556080', textTransform: 'uppercase',
+                letterSpacing: '.06em', marginBottom: 4 }}>Post-exit High (60min)</div>
+              <div style={{ fontSize: 14, color: '#00C97A' }}>{trade.post_exit_high}</div>
+            </div>
+            <div style={{ background: '#111626', borderRadius: 6, padding: '8px 12px' }}>
+              <div style={{ fontSize: 9, color: '#556080', textTransform: 'uppercase',
+                letterSpacing: '.06em', marginBottom: 4 }}>Post-exit Low (60min)</div>
+              <div style={{ fontSize: 14, color: '#f04060' }}>{trade.post_exit_low}</div>
+            </div>
+          </div>
+          {trade.exit_quality === 'EARLY' && (
+            <div style={{ fontSize: 11, color: '#F0A500', marginTop: 8 }}>
+              ⚠ Price continued moving in your favour after exit — consider trailing stops
+            </div>
+          )}
+          {trade.exit_quality === 'PERFECT' && (
+            <div style={{ fontSize: 11, color: '#00C97A', marginTop: 8 }}>
+              ✓ Good exit — price reversed after you closed
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* H1 Screenshots */}
+      {(trade.screenshot_h1_entry || trade.screenshot_h1_exit) && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
+            letterSpacing: '.08em', marginBottom: 8 }}>H1 Structure</div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {trade.screenshot_h1_entry && (
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 9, color: '#556080', marginBottom: 4 }}>H1 Entry</div>
+                <img src={`data:image/png;base64,${trade.screenshot_h1_entry}`} alt="H1 Entry"
+                  style={{ width: '100%', borderRadius: 6, border: '1px solid #1a1f30' }}/>
+              </div>
+            )}
+            {trade.screenshot_h1_exit && (
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 9, color: '#556080', marginBottom: 4 }}>H1 Exit</div>
+                <img src={`data:image/png;base64,${trade.screenshot_h1_exit}`} alt="H1 Exit"
+                  style={{ width: '100%', borderRadius: 6, border: '1px solid #1a1f30' }}/>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

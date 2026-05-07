@@ -3,6 +3,19 @@ import { getTrades, getSignals, getAccounts, getPerformance, getBias } from '../
 import Journal from './journal/Journal';
 import { useAuth } from '../context/AuthContext';
 
+const Logo = () => (
+  <svg width="140" height="28" viewBox="0 0 180 40" fill="none">
+    <rect x="0" y="6" width="4" height="22" rx="2" fill="#00C97A"/>
+    <rect x="6" y="3" width="4" height="28" rx="2" fill="#00C97A" opacity=".7"/>
+    <rect x="12" y="0" width="4" height="34" rx="2" fill="#00C97A" opacity=".9"/>
+    <rect x="18" y="5" width="4" height="24" rx="2" fill="#F0A500"/>
+    <rect x="24" y="10" width="4" height="16" rx="2" fill="#00C97A" opacity=".6"/>
+    <rect x="30" y="2" width="4" height="30" rx="2" fill="#00C97A"/>
+    <text x="40" y="24" fontFamily="Georgia,serif" fontSize="16" fontWeight="700" fill="#E8ECF4">Trade</text>
+    <text x="82" y="24" fontFamily="Georgia,serif" fontSize="16" fontWeight="400" fill="#00C97A">Pattrnly</text>
+  </svg>
+);
+
 function formatPnl(v: number) {
   return (v >= 0 ? '+' : '') + v.toFixed(2);
 }
@@ -78,10 +91,8 @@ export default function Dashboard() {
         padding: '10px 20px', borderBottom: '1px solid var(--border)',
         background: 'var(--bg2)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ color: 'var(--amber)', fontWeight: 700, letterSpacing: '.1em' }}>
-            MT5 SCANNER
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <Logo />
           {['main', 'performance', 'signals', 'journal'].map(t => (
             <span key={t}
               onClick={() => setTab(t)}
