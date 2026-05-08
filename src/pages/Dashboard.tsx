@@ -11,7 +11,7 @@ import Reports from './reports/Reports';
 import CalendarPage from './calendar/CalendarPage';
 import { useAuth } from '../context/AuthContext';
 
-function fmt(n: number) { return (n >= 0 ? '+' : '') + n.toFixed(2); }
+function fmt(n: number) { const abs = Math.abs(n).toFixed(2); return (n >= 0 ? '+$' : '-$') + abs; }
 
 function Badge({ type }: { type: string }) {
   const buy = type === 'BUY';

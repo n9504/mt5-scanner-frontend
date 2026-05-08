@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTrades } from '../../api/client';
 
-function fmt(n: number) { return (n >= 0 ? '+' : '') + n.toFixed(2); }
+function fmt(n: number) { const abs = Math.abs(n).toFixed(2); return (n >= 0 ? '+$' : '-$') + abs; }
 
 interface DayData {
   date: string;
