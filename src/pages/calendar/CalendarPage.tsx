@@ -91,7 +91,7 @@ export default function CalendarPage() {
           <div style={{ display: 'flex', gap: 20, fontSize: 12 }}>
             <span style={{ color: '#556080' }}>
               Monthly P&L: <span style={{ color: monthPnl >= 0 ? '#00C97A' : '#f04060', fontWeight: 700 }}>
-                {fmt(monthPnl)}
+                {(monthPnl >= 0 ? '+$' : '-$') + Math.abs(monthPnl).toFixed(2)}
               </span>
             </span>
             <span style={{ color: '#556080' }}>

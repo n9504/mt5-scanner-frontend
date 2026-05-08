@@ -45,7 +45,7 @@ function StatCard({ label, value, sub, color, small }: any) {
 }
 
 // ── MAIN TAB ──
-function MainTab({ openTrades, trades, accounts, performance }: any) {
+function MainTab({ openTrades, trades, accounts, performance, alerts, setAlerts }: any) {
   const today   = performance?.today || {};
   const pnl     = parseFloat(today.net_pnl || 0);
   const wr      = parseFloat(today.win_rate || 0);
@@ -167,6 +167,36 @@ function MainTab({ openTrades, trades, accounts, performance }: any) {
           </div>
         </div>
       </div>
+
+      {/* Alerts panel */}
+      {alerts && alerts.length > 0 && (
+        <div style={{ background:'rgba(240,64,96,0.05)', border:'1px solid rgba(240,64,96,0.2)',
+          borderRadius:8, padding:'16px 20px' }}>
+          <div style={{ fontSize:10, color:'#f04060', textTransform:'uppercase' as const,
+            letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>
+            ⚠ Alerts ({alerts.length})
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {alerts.map((a:any) => (
+              <div key={a.id} style={{ display:'flex', justifyContent:'space-between',
+                alignItems:'center', padding:'8px 12px', background:'#111626',
+                borderRadius:6, borderLeft:'3px solid #f04060' }}>
+                <div>
+                  <span style={{ fontSize:11, color:'#E8ECF4' }}>{a.message}</span>
+                  <span style={{ fontSize:10, color:'#556080', marginLeft:10 }}>
+                    {new Date(a.created_at).toLocaleTimeString()}
+                  </span>
+                </div>
+                <button onClick={async () => {
+                  await api.put(`/api/v1/alerts/${a.id}/read`);
+                  setAlerts((prev: any[]) => prev.filter((x:any) => x.id !== a.id));
+                }} style={{ background:'none', border:'none', color:'#556080',
+                  cursor:'pointer', fontSize:16, padding:'0 4px' }}>×</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent trades */}
       <div style={{ background: '#0c0f1a', border: '1px solid #111626', borderRadius: 8, padding: 20 }}>
@@ -435,7 +465,7 @@ export default function Dashboard() {
         height:300, color:'#556080', fontSize:13 }}>Loading...</div>
     );
     switch(tab) {
-      case 'dashboard':   return <MainTab openTrades={openTrades} trades={trades} accounts={accounts} performance={performance} />;
+      case 'dashboard':   return <MainTab openTrades={openTrades} trades={trades} accounts={accounts} performance={performance} alerts={alerts} setAlerts={setAlerts} />;
       case 'journal':     return <Journal />;
       case 'calendar':    return <CalendarPage />;
       case 'performance': return <PerformanceTab trades={allTrades} />;

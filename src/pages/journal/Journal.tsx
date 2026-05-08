@@ -124,6 +124,8 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
   const [saving,    setSaving]    = useState(false);
   const [analysing, setAnalysing] = useState(false);
   const [tab,       setTab]       = useState<'overview'|'charts'|'notes'>('overview');
+  const [showReplay,  setShowReplay]  = useState(false);
+  const [replayUrl,   setReplayUrl]   = useState('');
   const [screenshots, setScreenshots] = useState<any>(null);
   const [loadingSS,   setLoadingSS]   = useState(false);
 
@@ -392,18 +394,22 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                     {trade.status === 'CLOSED' && trade.open_time && (
                       <div style={{ marginBottom:10 }}>
                         <button onClick={() => {
-                          // Map symbol to Dukascopy format
                           const symMap: Record<string,string> = {
-                            'EURUSD':'EUR%2FUSD','GBPUSD':'GBP%2FUSD','USDJPY':'USD%2FJPY',
-                            'AUDUSD':'AUD%2FUSD','USDCAD':'USD%2FCAD','GBPJPY':'GBP%2FJPY',
-                            'EURJPY':'EUR%2FJPY','EURGBP':'EUR%2FGBP','USDCHF':'USD%2FCHF',
-                            'XAUUSD':'XAU%2FUSD','BTCUSD':'BTC%2FUSD',
+                            'EURUSD':'EUR/USD','GBPUSD':'GBP/USD','USDJPY':'USD/JPY',
+                            'AUDUSD':'AUD/USD','USDCAD':'USD/CAD','GBPJPY':'GBP/JPY',
+                            'EURJPY':'EUR/JPY','EURGBP':'EUR/GBP','USDCHF':'USD/CHF',
+                            'XAUUSD':'XAU/USD','BTCUSD':'BTC/USD','NZDUSD':'NZD/USD',
+                            'NAS100':'NAS100','US30':'US30','GER40':'GER40',
                           };
-                          const dukSym = symMap[trade.symbol] || 'EUR%2FUSD';
-                          // Convert open_time to timestamp
-                          const ts = new Date(trade.open_time).getTime();
-                          const url = `https://freeserv.dukascopy.com/2.0/?path=chart/index&instrument=${dukSym}&offerSide=BID&chartType=CANDLESTICK&timeFrame=ONE_MIN&start=${ts}&end=${ts + 3600000}&height=580&showControls=true`;
-                          window.open(url, '_blank', 'width=1200,height=700');
+                          const dukSym = encodeURIComponent(symMap[trade.symbol] || 'EUR/USD');
+                          // open_time stored as UTC in DB
+                          const tsStart = new Date(trade.open_time).getTime();
+                          const tsEnd   = trade.close_time
+                            ? new Date(trade.close_time).getTime() + 3600000
+                            : tsStart + 7200000;
+                          const url = `https://freeserv.dukascopy.com/2.0/?path=chart/index&instrument=${dukSym}&offerSide=BID&chartType=CANDLESTICK&timeFrame=ONE_MIN&start=${tsStart}&end=${tsEnd}&showControls=true`;
+                          setReplayUrl(url);
+                          setShowReplay(true);
                         }} style={{
                           width:'100%', padding:'9px', background:'rgba(64,144,240,.08)',
                           border:'1px solid rgba(64,144,240,.2)', borderRadius:6,
@@ -606,6 +612,34 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                   </button>
                 </div>
               )}
+            </div>
+          </td>
+        </tr>
+      )}
+      {/* Dukascopy Replay Modal */}
+      {showReplay && replayUrl && (
+        <tr>
+          <td colSpan={10} style={{ padding:0, background:'#060912' }}>
+            <div style={{ padding:'0 24px 20px' }}>
+              <div style={{ display:'flex', justifyContent:'space-between',
+                alignItems:'center', padding:'12px 0 10px' }}>
+                <div style={{ fontSize:11, color:'#4090f0', fontWeight:700 }}>
+                  ▶ Trade Replay — {trade.symbol} ({trade.bias})
+                </div>
+                <button onClick={() => setShowReplay(false)} style={{
+                  background:'none', border:'none', color:'#556080',
+                  cursor:'pointer', fontSize:18 }}>× Close</button>
+              </div>
+              <iframe
+                src={replayUrl}
+                width="100%"
+                height="520"
+                style={{ border:'1px solid #1a1f30', borderRadius:6, display:'block' }}
+                title="Dukascopy Trade Replay"
+              />
+              <div style={{ fontSize:10, color:'#3a4560', marginTop:6, textAlign:'center' as const }}>
+                Powered by Dukascopy Free Chart · Times in UTC
+              </div>
             </div>
           </td>
         </tr>
