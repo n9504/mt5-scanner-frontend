@@ -124,6 +124,8 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
   const [saving,    setSaving]    = useState(false);
   const [analysing, setAnalysing] = useState(false);
   const [tab,       setTab]       = useState<'overview'|'charts'|'notes'>('overview');
+  const [screenshots, setScreenshots] = useState<any>(null);
+  const [loadingSS,   setLoadingSS]   = useState(false);
 
   const win  = (trade.execution_outcome||'').startsWith('WIN');
   const pnl  = parseFloat(trade.net_pnl || 0);
@@ -242,7 +244,16 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
               <div style={{ display:'flex', gap:0, marginBottom:20,
                 borderBottom:'1px solid #1a1f30' }}>
                 {(['overview','charts','notes'] as const).map(t => (
-                  <button key={t} onClick={() => setTab(t)} style={{
+                  <button key={t} onClick={() => {
+                setTab(t);
+                if (t === 'charts' && !screenshots && !loadingSS) {
+                  setLoadingSS(true);
+                  api.get(`/api/v1/trades/${trade.id}/screenshots`)
+                    .then(r => { setScreenshots(r.data); })
+                    .catch(() => {})
+                    .finally(() => setLoadingSS(false));
+                }
+              }} style={{
                     padding:'8px 20px', background:'none', border:'none',
                     borderBottom: tab===t ? '2px solid #00C97A' : '2px solid transparent',
                     color: tab===t ? '#E8ECF4' : '#556080',
@@ -377,6 +388,34 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                       );
                     })()}
 
+                    {/* Trade Replay */}
+                    {trade.status === 'CLOSED' && trade.open_time && (
+                      <div style={{ marginBottom:10 }}>
+                        <button onClick={() => {
+                          // Map symbol to Dukascopy format
+                          const symMap: Record<string,string> = {
+                            'EURUSD':'EUR%2FUSD','GBPUSD':'GBP%2FUSD','USDJPY':'USD%2FJPY',
+                            'AUDUSD':'AUD%2FUSD','USDCAD':'USD%2FCAD','GBPJPY':'GBP%2FJPY',
+                            'EURJPY':'EUR%2FJPY','EURGBP':'EUR%2FGBP','USDCHF':'USD%2FCHF',
+                            'XAUUSD':'XAU%2FUSD','BTCUSD':'BTC%2FUSD',
+                          };
+                          const dukSym = symMap[trade.symbol] || 'EUR%2FUSD';
+                          // Convert open_time to timestamp
+                          const ts = new Date(trade.open_time).getTime();
+                          const url = `https://freeserv.dukascopy.com/2.0/?path=chart/index&instrument=${dukSym}&offerSide=BID&chartType=CANDLESTICK&timeFrame=ONE_MIN&start=${ts}&end=${ts + 3600000}&height=580&showControls=true`;
+                          window.open(url, '_blank', 'width=1200,height=700');
+                        }} style={{
+                          width:'100%', padding:'9px', background:'rgba(64,144,240,.08)',
+                          border:'1px solid rgba(64,144,240,.2)', borderRadius:6,
+                          color:'#4090f0', fontSize:11, fontWeight:700, cursor:'pointer',
+                          letterSpacing:'.06em', display:'flex', alignItems:'center',
+                          justifyContent:'center', gap:8,
+                        }}>
+                          ▶ Replay on Dukascopy
+                        </button>
+                      </div>
+                    )}
+
                     {/* Post-exit */}
                     {trade.post_exit_tracked && exitQ && (
                       <div style={{ background:`${exitColor}08`,
@@ -446,7 +485,11 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
               {/* CHARTS TAB */}
               {tab === 'charts' && (
                 <div>
-                  {!trade.screenshot_entry && !trade.screenshot_h1_entry ? (
+                  {loadingSS ? (
+                <div style={{ textAlign:'center', color:'#556080', padding:'40px 0', fontSize:12 }}>
+                  Loading charts...
+                </div>
+              ) : !screenshots?.screenshot_entry && !screenshots?.screenshot_h1_entry && !trade.screenshot_entry && !trade.screenshot_h1_entry ? (
                     <div style={{ textAlign:'center', color:'#556080', padding:'40px 0' }}>
                       <div style={{ fontSize:24, marginBottom:8 }}>
                         {trade.status === 'OPEN' ? '⏳' : '📸'}
@@ -474,9 +517,9 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>M15</div>
                                 <img
-                                  src={trade.screenshot_entry.startsWith('data:')
-                                    ? trade.screenshot_entry
-                                    : `data:image/png;base64,${trade.screenshot_entry}`}
+                                  src={(screenshots?.screenshot_entry || trade.screenshot_entry || '').startsWith('data:')
+                                    ? (screenshots?.screenshot_entry || trade.screenshot_entry)
+                                    : `data:image/png;base64,${screenshots?.screenshot_entry || trade.screenshot_entry}`}
                                   alt="M15 Entry"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
@@ -486,9 +529,9 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>H1</div>
                                 <img
-                                  src={trade.screenshot_h1_entry.startsWith('data:')
-                                    ? trade.screenshot_h1_entry
-                                    : `data:image/png;base64,${trade.screenshot_h1_entry}`}
+                                  src={(screenshots?.screenshot_h1_entry || trade.screenshot_h1_entry || '').startsWith('data:')
+                                    ? (screenshots?.screenshot_h1_entry || trade.screenshot_h1_entry)
+                                    : `data:image/png;base64,${screenshots?.screenshot_h1_entry || trade.screenshot_h1_entry}`}
                                   alt="H1 Entry"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
@@ -511,9 +554,9 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>M15</div>
                                 <img
-                                  src={trade.screenshot_exit.startsWith('data:')
-                                    ? trade.screenshot_exit
-                                    : `data:image/png;base64,${trade.screenshot_exit}`}
+                                  src={(screenshots?.screenshot_exit || trade.screenshot_exit || '').startsWith('data:')
+                                    ? (screenshots?.screenshot_exit || trade.screenshot_exit)
+                                    : `data:image/png;base64,${screenshots?.screenshot_exit || trade.screenshot_exit}`}
                                   alt="M15 Exit"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
@@ -523,9 +566,9 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>H1</div>
                                 <img
-                                  src={trade.screenshot_h1_exit.startsWith('data:')
-                                    ? trade.screenshot_h1_exit
-                                    : `data:image/png;base64,${trade.screenshot_h1_exit}`}
+                                  src={(screenshots?.screenshot_h1_exit || trade.screenshot_h1_exit || '').startsWith('data:')
+                                    ? (screenshots?.screenshot_h1_exit || trade.screenshot_h1_exit)
+                                    : `data:image/png;base64,${screenshots?.screenshot_h1_exit || trade.screenshot_h1_exit}`}
                                   alt="H1 Exit"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>

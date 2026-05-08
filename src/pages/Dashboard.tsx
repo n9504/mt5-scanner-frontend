@@ -150,11 +150,11 @@ function MainTab({ openTrades, trades, accounts, performance }: any) {
             letterSpacing: '.1em', fontWeight: 700, marginBottom: 14 }}>Today at a Glance</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { label: 'Wins',       value: today.wins || 0,                color: '#00C97A' },
-              { label: 'Losses',     value: today.losses || 0,              color: '#f04060' },
-              { label: 'Gross P&L',  value: fmt(parseFloat(today.gross_pnl||0)), color: parseFloat(today.gross_pnl||0)>=0?'#00C97A':'#f04060' },
-              { label: 'Commission', value: (parseFloat(today.commission||0)).toFixed(2), color: '#556080' },
-              { label: 'Net P&L',    value: fmt(pnl),                       color: pnl>=0?'#00C97A':'#f04060' },
+              { label: 'Wins Today',      value: today.wins || 0,                color: '#00C97A' },
+              { label: 'Losses Today',    value: today.losses || 0,              color: '#f04060' },
+              { label: 'Gross P&L',       value: fmt(parseFloat(today.gross_pnl||0)), color: parseFloat(today.gross_pnl||0)>=0?'#00C97A':'#f04060' },
+              { label: 'Commission',      value: (parseFloat(today.commission||0)).toFixed(2), color: '#556080' },
+              { label: "Today's Net P&L", value: fmt(pnl),                       color: pnl>=0?'#00C97A':'#f04060' },
             ].map((r, i, arr) => (
               <div key={r.label} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -381,6 +381,7 @@ export default function Dashboard() {
   const { tenant } = useAuth();
   const [tab,         setTab]         = useState('dashboard');
   const [trades,      setTrades]      = useState<any[]>([]);
+  const [allTrades,   setAllTrades]   = useState<any[]>([]);
   const [openTrades,  setOpenTrades]  = useState<any[]>([]);
   const [signals,     setSignals]     = useState<any[]>([]);
   const [accounts,    setAccounts]    = useState<any[]>([]);
@@ -398,13 +399,15 @@ export default function Dashboard() {
       setAccounts(accRes.data);
       setPerformance(perfRes.data);
 
-      const [tradeRes, openRes, sigRes, alertRes] = await Promise.all([
+      const [tradeRes, allTradeRes, openRes, sigRes, alertRes] = await Promise.all([
         getTrades({ status: 'CLOSED', period: 'today' }).catch(() => ({ data: [] })),
+        getTrades({ status: 'CLOSED', period: 'all' }).catch(() => ({ data: [] })),
         getTrades({ status: 'OPEN' }).catch(() => ({ data: [] })),
         getSignals('PENDING').catch(() => ({ data: [] })),
         api.get('/api/v1/alerts').catch(() => ({ data: [] })),
       ]);
       setTrades(tradeRes.data);
+      setAllTrades(allTradeRes.data);
       setOpenTrades(openRes.data);
       setSignals(sigRes.data);
       setAlerts(alertRes.data || []);
@@ -435,7 +438,7 @@ export default function Dashboard() {
       case 'dashboard':   return <MainTab openTrades={openTrades} trades={trades} accounts={accounts} performance={performance} />;
       case 'journal':     return <Journal />;
       case 'calendar':    return <CalendarPage />;
-      case 'performance': return <PerformanceTab trades={trades} />;
+      case 'performance': return <PerformanceTab trades={allTrades} />;
       case 'reports':     return <Reports />;
       case 'bias':        return <Bias />;
       case 'insights':    return isPro ? <Insights /> : <div style={{ textAlign:'center', padding:60, color:'#556080' }}>Available on Pro plan</div>;

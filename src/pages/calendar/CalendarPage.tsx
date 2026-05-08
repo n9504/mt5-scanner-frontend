@@ -19,10 +19,18 @@ export default function CalendarPage() {
   const [selectedDay,setSelectedDay]= useState<string | null>(null);
 
   useEffect(() => {
+    // Check cache first
+    const cached = sessionStorage.getItem('calendar_trades');
+    if (cached) {
+      try { setTrades(JSON.parse(cached)); } catch(e) {}
+    }
+    // Always refresh in background
     getTrades({ status: 'CLOSED', period: 'all' })
-      .then(r => setTrades(r.data || []))
-      .catch(() => {})
-      .finally(() => {});
+      .then(r => {
+        setTrades(r.data || []);
+        sessionStorage.setItem('calendar_trades', JSON.stringify(r.data || []));
+      })
+      .catch(() => {});
   }, []);
 
   // Group trades by date
