@@ -29,11 +29,12 @@ export default function CalendarPage() {
   const byDate: Record<string, DayData> = {};
   trades.forEach(t => {
     if (!t.close_time) return;
+    // Use UTC date to match server-stored dates
     const d = new Date(t.close_time);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
     if (!byDate[key]) byDate[key] = { date: key, trades: [], pnl: 0, wins: 0, losses: 0, wr: 0 };
     byDate[key].trades.push(t);
-    byDate[key].pnl += parseFloat(t.net_pnl || 0);
+    byDate[key].pnl += parseFloat(t.net_pnl || 0); // net_pnl already includes commission
     if ((t.execution_outcome||'').startsWith('WIN')) byDate[key].wins++;
     else byDate[key].losses++;
   });

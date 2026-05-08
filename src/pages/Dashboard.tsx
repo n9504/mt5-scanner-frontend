@@ -447,7 +447,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ display:'flex', minHeight:'100vh', background:'#070b14',
-      fontFamily:"'JetBrains Mono','Fira Code',monospace", color:'#E8ECF4' }}>
+      fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color:'#E8ECF4' }}>
 
       {/* Setup wizard overlay */}
       {showSetup && accounts[0] && (

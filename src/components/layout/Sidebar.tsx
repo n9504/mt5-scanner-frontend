@@ -134,7 +134,7 @@ export default function Sidebar({ activeTab, onTabChange, accounts, tenant }: Si
                 color: active ? '#E8ECF4' : '#556080',
                 cursor: 'pointer',
                 fontSize: 13,
-                fontFamily: 'inherit',
+                fontFamily: "'Inter',-apple-system,sans-serif",
                 fontWeight: active ? 600 : 400,
                 transition: 'all 0.15s',
                 textAlign: 'left',
@@ -171,7 +171,7 @@ export default function Sidebar({ activeTab, onTabChange, accounts, tenant }: Si
             justifyContent: collapsed ? 'center' : 'flex-start',
             background: 'transparent', border: 'none',
             color: '#556080', cursor: 'pointer',
-            fontSize: 12, fontFamily: 'inherit',
+            fontSize: 12, fontFamily: "'Inter',-apple-system,sans-serif",
             transition: 'color 0.15s',
           }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#f04060'}
