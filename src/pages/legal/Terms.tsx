@@ -41,13 +41,13 @@ export default function Terms() {
         <p style={styles.date}>Last updated: May 2026</p>
 
         <h2 style={styles.h2}>1. Acceptance of Terms</h2>
-        <p style={styles.p}>By accessing or using TradePattrnly ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.</p>
+        <p style={styles.p}>By accessing or using TradePattrnly, you also agree to our Privacy Policy available at tradepattrnly.com/privacy. By accessing or using TradePattrnly ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.</p>
 
         <h2 style={styles.h2}>2. Description of Service</h2>
-        <p style={styles.p}>TradePattrnly is an AI-powered trading journal and analytics platform. The Service provides trade tracking, performance analysis, AI-generated insights, and optional signal feeds. TradePattrnly is a tool for educational and informational purposes only.</p>
+        <p style={styles.p}>TradePattrnly is an AI-powered behavioral intelligence and trading analytics platform. The Service provides automated trade tracking, behavioural pattern analysis, AI-generated educational insights, and performance analytics. TradePattrnly is a tool for educational and informational purposes only.</p>
 
         <h2 style={styles.h2}>3. Not Financial Advice</h2>
-        <p style={styles.p}>TradePattrnly does not provide financial advice. All content, signals, analysis, and insights provided through the Service are for informational and educational purposes only. Nothing on this platform constitutes a recommendation to buy or sell any financial instrument. You are solely responsible for your trading decisions.</p>
+        <p style={styles.p}>TradePattrnly does not provide financial advice. All content, analysis, behavioral insights, and educational content provided through the Service are for informational and educational purposes only. Nothing on this platform constitutes a recommendation to buy or sell any financial instrument. You are solely responsible for your trading decisions.</p>
         <p style={styles.p}>Trading financial instruments involves significant risk of loss and may not be suitable for all investors. Past performance is not indicative of future results.</p>
 
         <h2 style={styles.h2}>4. User Accounts</h2>
@@ -59,8 +59,15 @@ export default function Terms() {
         <h2 style={styles.h2}>6. Acceptable Use</h2>
         <p style={styles.p}>You agree not to misuse the Service, attempt to reverse engineer any part of the platform, share your account credentials, or use the Service for any illegal purpose.</p>
 
-        <h2 style={styles.h2}>7. Intellectual Property</h2>
-        <p style={styles.p}>TradePattrnly and its original content, features, and functionality are owned by TradePattrnly and are protected by international copyright laws. Your trade data remains your own.</p>
+        <h2 style={styles.h2}>6a. No Guarantee of Availability</h2>
+        <p style={styles.p}>We do not guarantee uninterrupted availability, accuracy, or reliability of the Service. The platform may be unavailable due to maintenance, technical issues, or circumstances beyond our control. We are not liable for any losses arising from unavailability of the Service.</p>
+
+        <h2 style={styles.h2}>6b. No Reliance</h2>
+        <p style={styles.p}>You acknowledge that any reliance on information, insights, or analysis provided by the Service is at your own risk. The Service provides historical behavioural analysis only and does not constitute advice of any kind. All information is provided for educational and informational purposes only.</p>
+
+        <h2 style={styles.h2}>7. Intellectual Property &amp; Data</h2>
+        <p style={styles.p}>TradePattrnly and its original content, features, and functionality are owned by TradePattrnly and are protected by international copyright laws. Your trade data remains your own. We do not sell your personal trading data to third parties.</p>
+        <p style={styles.p}>By using the Service, you grant TradePattrnly a limited licence to process your data solely to provide the Service. We may use anonymised, aggregated data to improve our models and service quality. No personally identifiable information is used in model training without explicit consent. Use of the Service is also governed by our <a href="/privacy" style={{ color:'#00C97A' }}>Privacy Policy</a>.</p>
 
         <h2 style={styles.h2}>8. Limitation of Liability</h2>
         <p style={styles.p}>TradePattrnly shall not be liable for any indirect, incidental, special, or consequential damages resulting from your use of the Service, including any trading losses. Our total liability shall not exceed the amount you paid for the Service in the 12 months preceding the claim.</p>
