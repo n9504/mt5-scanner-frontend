@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getTrades } from '../../api/client';
 import api from '../../api/client';
-import TradeReplay from './TradeReplay';
 
 // ── TAG CONFIG ──
 const TAG_COLORS: Record<string, { bg: string; color: string }> = {
@@ -125,7 +124,6 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
   const [saving,    setSaving]    = useState(false);
   const [analysing, setAnalysing] = useState(false);
   const [tab,       setTab]       = useState<'overview'|'charts'|'notes'>('overview');
-  const [showReplay,  setShowReplay]  = useState(false);
   const [screenshots, setScreenshots] = useState<any>(null);
   const [loadingSS,   setLoadingSS]   = useState(false);
 
@@ -390,23 +388,6 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                       );
                     })()}
 
-                    {/* Trade Replay */}
-                    {trade.status === 'CLOSED' && trade.open_time && (
-                      <div style={{ marginBottom:10 }}>
-                        <button onClick={() => {
-                          setShowReplay(true);
-                        }} style={{
-                          width:'100%', padding:'9px', background:'rgba(64,144,240,.08)',
-                          border:'1px solid rgba(64,144,240,.2)', borderRadius:6,
-                          color:'#4090f0', fontSize:11, fontWeight:700, cursor:'pointer',
-                          letterSpacing:'.06em', display:'flex', alignItems:'center',
-                          justifyContent:'center', gap:8,
-                        }}>
-                          ▶ Replay on Dukascopy
-                        </button>
-                      </div>
-                    )}
-
                     {/* Post-exit */}
                     {trade.post_exit_tracked && exitQ && (
                       <div style={{ background:`${exitColor}08`,
@@ -601,16 +582,6 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
           </td>
         </tr>
       )}
-      {/* Trade Replay */}
-      {showReplay && (
-        <tr>
-          <td colSpan={10} style={{ padding:'0 0 16px', background:'#060912' }}>
-            <div style={{ padding:'0 24px' }}>
-              <TradeReplay trade={trade} onClose={() => setShowReplay(false)} />
-            </div>
-          </td>
-        </tr>
-      )}
     </>
   );
 }
@@ -624,6 +595,7 @@ export default function Journal() {
   const [filterScanner, setFilterScanner] = useState('all');
   const [filterTag,     setFilterTag]     = useState('');
   const [filterResult,  setFilterResult]  = useState('all');
+  const [filterDate,    setFilterDate]    = useState('');
 
   const load = async (force=false) => {
     const cacheKey = `journal_trades_${period}`;
@@ -665,6 +637,10 @@ export default function Journal() {
     if (filterTag && !(t.tags||[]).includes(filterTag)) return false;
     if (filterResult === 'win'  && !(t.execution_outcome||'').startsWith('WIN'))  return false;
     if (filterResult === 'loss' && !(t.execution_outcome||'').startsWith('LOSS')) return false;
+    if (filterDate) {
+      const closeDate = t.close_time ? new Date(t.close_time).toISOString().slice(0,10) : '';
+      if (closeDate !== filterDate) return false;
+    }
     return true;
   });
 
@@ -736,9 +712,13 @@ export default function Journal() {
             {allTags.map(t=><option key={t} value={t}>{t}</option>)}
           </select>
         )}
-        {(filterSymbol||filterTag||filterScanner!=='all'||filterResult!=='all') && (
+        <input type="date" value={filterDate} onChange={e=>setFilterDate(e.target.value)}
+          style={{ padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
+            borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit',
+            colorScheme:'dark' }}/>
+        {(filterSymbol||filterTag||filterScanner!=='all'||filterResult!=='all'||filterDate) && (
           <button onClick={()=>{setFilterSymbol('');setFilterTag('');
-            setFilterScanner('all');setFilterResult('all');}} style={{
+            setFilterScanner('all');setFilterResult('all');setFilterDate('');}} style={{
             padding:'7px 12px', background:'transparent',
             border:'1px solid #252d42', borderRadius:6,
             color:'#556080', fontSize:11, cursor:'pointer' }}>

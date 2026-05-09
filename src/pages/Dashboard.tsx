@@ -308,16 +308,54 @@ function PerformanceTab({ trades }: any) {
         <div style={{ background:'#0c0f1a', border:'1px solid #111626', borderRadius:8, padding:20 }}>
           <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
             letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>Equity Curve</div>
-          <svg width="100%" height="80" viewBox="0 0 100 80" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="eqG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={netPnl>=0?"#00C97A":"#f04060"} stopOpacity="0.3"/>
-                <stop offset="100%" stopColor={netPnl>=0?"#00C97A":"#f04060"} stopOpacity="0"/>
-              </linearGradient>
-            </defs>
-            <polyline points={pts} fill="none" stroke={netPnl>=0?"#00C97A":"#f04060"} strokeWidth="0.8"/>
-            <polygon points={`0,80 ${pts} 100,80`} fill="url(#eqG)"/>
-          </svg>
+          <div style={{ position:'relative' as const, height:160 }}>
+            <svg width="100%" height="160" style={{ display:'block' }}>
+              <defs>
+                <linearGradient id="eqG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={netPnl>=0?"#00C97A":"#f04060"} stopOpacity="0.3"/>
+                  <stop offset="100%" stopColor={netPnl>=0?"#00C97A":"#f04060"} stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              {/* Y axis grid lines and labels */}
+              {[0,0.25,0.5,0.75,1].map((pct,i) => {
+                const price = maxEq - pct*(maxEq-minEq);
+                const y = 10 + pct*120;
+                return (
+                  <g key={i}>
+                    <line x1="0" y1={y} x2="85%" y2={y} stroke="#111626" strokeWidth="1"/>
+                    <text x="87%" y={y+4} fill="#3a4560" fontSize="9" fontFamily="Inter,sans-serif">
+                      {price>=0?'+$':'-$'}{Math.abs(price).toFixed(0)}
+                    </text>
+                  </g>
+                );
+              })}
+              {/* Zero line */}
+              {minEq < 0 && maxEq > 0 && (
+                <line x1="0" y1={10 + (maxEq/(maxEq-minEq))*120} x2="85%"
+                  y2={10 + (maxEq/(maxEq-minEq))*120}
+                  stroke="#252d42" strokeWidth="1" strokeDasharray="3,3"/>
+              )}
+              {/* Equity line */}
+              <g transform="translate(0,10) scale(0.85,1.2)">
+                <polyline points={pts} fill="none"
+                  stroke={netPnl>=0?"#00C97A":"#f04060"} strokeWidth="1.5"/>
+                <polygon points={`0,100 ${pts} 100,100`} fill="url(#eqG)"/>
+              </g>
+              {/* X axis date labels */}
+              {[0,0.25,0.5,0.75,1].map((pct,i) => {
+                const idx2 = Math.floor(pct*(trades.length-1));
+                const t = trades[idx2];
+                if (!t) return null;
+                const d = new Date(t.close_time||t.open_time);
+                return (
+                  <text key={i} x={`${pct*85}%`} y="155"
+                    fill="#3a4560" fontSize="9" fontFamily="Inter,sans-serif" textAnchor="middle">
+                    {d.getUTCDate()}/{d.getUTCMonth()+1}
+                  </text>
+                );
+              })}
+            </svg>
+          </div>
         </div>
       )}
 
