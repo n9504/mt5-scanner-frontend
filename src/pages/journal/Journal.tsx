@@ -293,40 +293,55 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                       try { ea = trade.entry_analysis ? JSON.parse(trade.entry_analysis) : null; } catch(e) {}
                       return ea ? (
                         <div style={{ marginBottom:12 }}>
-                          {/* Score + probabilities */}
+                          {/* Entry Analysis - structural only */}
                           <div style={{ background:'rgba(0,201,122,.04)', border:'1px solid rgba(0,201,122,.15)',
                             borderRadius:6, padding:'14px 16px', marginBottom:8 }}>
                             <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
                               letterSpacing:'.08em', marginBottom:12 }}>📊 Entry Analysis</div>
-                            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:12 }}>
+                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
                               <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>ENTRY SCORE</div>
-                                <div style={{ fontSize:22, fontWeight:700, color: ea.entry_score>=7?'#00C97A':ea.entry_score>=5?'#F0A500':'#f04060',
+                                <div style={{ fontSize:22, fontWeight:700,
+                                  color: ea.entry_score>=7?'#00C97A':ea.entry_score>=5?'#F0A500':'#f04060',
                                   fontFamily:'Georgia,serif' }}>{ea.entry_score}/10</div>
                               </div>
                               <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
-                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>TP PROBABILITY</div>
-                                <div style={{ fontSize:22, fontWeight:700, color:'#00C97A', fontFamily:'Georgia,serif' }}>{ea.tp_probability}%</div>
-                              </div>
-                              <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
-                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>SL PROBABILITY</div>
-                                <div style={{ fontSize:22, fontWeight:700, color:'#f04060', fontFamily:'Georgia,serif' }}>{ea.sl_probability}%</div>
+                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>ENTRY QUALITY</div>
+                                <div style={{ fontSize:16, fontWeight:700,
+                                  color: ea.entry_quality==='Excellent'||ea.entry_quality==='Good'?'#00C97A':ea.entry_quality==='Average'?'#F0A500':'#f04060',
+                                  fontFamily:'Georgia,serif' }}>{ea.entry_quality || '—'}</div>
                               </div>
                             </div>
-                            {ea.entry_reasoning && (
-                              <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>{ea.entry_reasoning}</div>
+                            {/* Structural observation - no trading guidance */}
+                            {(ea.structural_observation || ea.entry_reasoning) && (
+                              <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>
+                                {ea.structural_observation || ea.entry_reasoning}
+                              </div>
                             )}
-                            {ea.key_level && <div style={{ fontSize:11, color:'#F0A500', marginBottom:4 }}>📍 Key level: {ea.key_level}</div>}
-                            {ea.watch_for && <div style={{ fontSize:11, color:'#556080' }}>👀 {ea.watch_for}</div>}
+                            {(ea.key_zone || ea.key_level) && (
+                              <div style={{ fontSize:11, color:'#F0A500', marginBottom:4 }}>
+                                📍 Key zone: {ea.key_zone || ea.key_level}
+                              </div>
+                            )}
+                            {ea.trendline_touches > 0 && (
+                              <div style={{ fontSize:11, color:'#4090f0', marginBottom:4 }}>
+                                📐 {ea.trendline_type} trendline — {ea.trendline_touches} touches detected
+                              </div>
+                            )}
+                            {ea.news_risk && (
+                              <div style={{ fontSize:11, color:'#f04060' }}>
+                                ⚠ High impact news event detected near entry time
+                              </div>
+                            )}
                           </div>
 
-                          {/* Simulated balance */}
+                          {/* Scenario Analysis */}
                           {(ea.sim_tp_pnl !== undefined || ea.sim_sl_pnl !== undefined) && (
                             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
                               <div style={{ background:'rgba(0,201,122,.04)', border:'1px solid rgba(0,201,122,.15)',
                                 borderRadius:5, padding:'10px 14px' }}>
                                 <div style={{ fontSize:9, color:'#556080', textTransform:'uppercase' as const,
-                                  letterSpacing:'.06em', marginBottom:4 }}>If all {ea.open_count || 1} open trades hit TP</div>
+                                  letterSpacing:'.06em', marginBottom:4 }}>Scenario: All reach target zone</div>
                                 <div style={{ fontSize:16, fontWeight:700, color:'#00C97A' }}>
                                   {ea.sim_tp_pnl >= 0 ? '+' : ''}{ea.sim_tp_pnl?.toFixed(2) || '—'}
                                 </div>
@@ -334,9 +349,9 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                               <div style={{ background:'rgba(240,64,96,.04)', border:'1px solid rgba(240,64,96,.15)',
                                 borderRadius:5, padding:'10px 14px' }}>
                                 <div style={{ fontSize:9, color:'#556080', textTransform:'uppercase' as const,
-                                  letterSpacing:'.06em', marginBottom:4 }}>If all open trades hit SL</div>
+                                  letterSpacing:'.06em', marginBottom:4 }}>Scenario: All reach stop zone</div>
                                 <div style={{ fontSize:16, fontWeight:700, color:'#f04060' }}>
-                                  {ea.sim_sl_pnl >= 0 ? '+' : ''}{ea.sim_sl_pnl?.toFixed(2) || '—'}
+                                  {ea.sim_sl_pnl?.toFixed(2) || '—'}
                                 </div>
                               </div>
                             </div>

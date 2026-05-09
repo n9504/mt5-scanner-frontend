@@ -367,7 +367,7 @@ export default function Landing() {
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00C97A',
             animation: 'pulse 2s infinite' }}/>
           <span style={{ fontSize: 11, color: '#00C97A', letterSpacing: '.08em',
-            textTransform: 'uppercase' }}>The World's First Fully Automated Trading Journal</span>
+            textTransform: 'uppercase' }}>Discover What You Actually Trade. Master What Works.</span>
         </div>
 
         <h1 className="slide-up-2" style={{
@@ -587,6 +587,9 @@ export default function Landing() {
       }}>
         <Logo size={22} />
         <div style={{ color: '#556080', fontSize: 11 }}>
+          TradePattrnly provides analytics, journaling and educational insights only. It does not provide financial advice, investment recommendations, or trading signals. Past performance does not indicate future results. Trading leveraged instruments involves significant risk of loss.
+          </div>
+          <div style={{ marginTop:8 }}>
           © 2026 TradePattrnly. All rights reserved.
         </div>
         <div style={{ display: 'flex', gap: 24 }}>

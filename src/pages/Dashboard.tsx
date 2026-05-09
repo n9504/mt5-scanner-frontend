@@ -6,7 +6,6 @@ import Journal from './journal/Journal';
 import Insights from './insights/Insights';
 import Settings from './settings/Settings';
 import AccountSetup from './setup/AccountSetup';
-import Bias from './bias/Bias';
 import Reports from './reports/Reports';
 import CalendarPage from './calendar/CalendarPage';
 import PlanPage from './plan/PlanPage';
@@ -391,62 +390,6 @@ function PerformanceTab({ trades }: any) {
   );
 }
 
-// ── SIGNALS TAB ──
-function SignalsTab({ signals, onRefresh }: any) {
-  const [loading, setLoading] = useState<string|null>(null);
-  const toggle = async (id:string) => { setLoading(id); await api.put(`/api/v1/signals/${id}/toggle`); await onRefresh(); setLoading(null); };
-  const cancel = async (id:string) => { setLoading(id); await api.put(`/api/v1/signals/${id}/cancel`); await onRefresh(); setLoading(null); };
-
-  return (
-    <div style={{ background:'#0c0f1a', border:'1px solid #111626', borderRadius:8, padding:20 }}>
-      <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
-        letterSpacing:'.1em', fontWeight:700, marginBottom:14 }}>Active Signals</div>
-      {signals.length === 0 ? (
-        <div style={{ textAlign:'center', color:'#3a4560', padding:'40px 0', fontSize:12 }}>No active signals</div>
-      ) : (
-        <table style={{ width:'100%', borderCollapse:'collapse' }}>
-          <thead><tr>
-            {['Time','Symbol','Dir','Scanner','Entry','SL','TP','RR','Fire','Actions'].map(h=>(
-              <th key={h} style={{ fontSize:9, color:'#556080', textTransform:'uppercase' as const,
-                letterSpacing:'.08em', padding:'4px 8px', textAlign:'left' as const,
-                borderBottom:'1px solid #111626' }}>{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {signals.map((s:any)=>(
-              <tr key={s.id} style={{ borderBottom:'1px solid #0c0f1a' }}>
-                <td style={{ padding:'8px', fontSize:11, color:'#556080' }}>{new Date(s.signal_time).toLocaleTimeString()}</td>
-                <td style={{ padding:'8px', fontWeight:700, color:'#F0A500', fontSize:12 }}>{s.symbol}</td>
-                <td style={{ padding:'8px' }}><Badge type={s.bias} /></td>
-                <td style={{ padding:'8px' }}><SBadge s={s.scanner} /></td>
-                <td style={{ padding:'8px', fontSize:12, color:'#8899b4' }}>{s.entry}</td>
-                <td style={{ padding:'8px', fontSize:12, color:'#f04060' }}>{s.sl}</td>
-                <td style={{ padding:'8px', fontSize:12, color:'#00C97A' }}>{s.tp}</td>
-                <td style={{ padding:'8px', fontSize:12, color:'#F0A500' }}>{s.rr_target}R</td>
-                <td style={{ padding:'8px' }}>
-                  <span onClick={()=>toggle(s.id)} style={{
-                    padding:'2px 8px', borderRadius:3, fontSize:10, fontWeight:700, cursor:'pointer',
-                    background:s.fire_enabled?'rgba(0,201,122,.12)':'rgba(240,64,96,.12)',
-                    color:s.fire_enabled?'#00C97A':'#f04060' }}>
-                    {s.fire_enabled?'ON':'OFF'}
-                  </span>
-                </td>
-                <td style={{ padding:'8px' }}>
-                  <button onClick={()=>cancel(s.id)} disabled={loading===s.id}
-                    style={{ padding:'3px 10px', background:'transparent', border:'1px solid #252d42',
-                      borderRadius:4, color:'#556080', fontSize:10, cursor:'pointer' }}>
-                    Cancel
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
-}
-
 // ── MAIN DASHBOARD ──
 export default function Dashboard() {
   const { tenant } = useAuth();
@@ -454,7 +397,6 @@ export default function Dashboard() {
   const [trades,      setTrades]      = useState<any[]>([]);
   const [allTrades,   setAllTrades]   = useState<any[]>([]);
   const [openTrades,  setOpenTrades]  = useState<any[]>([]);
-  const [signals,     setSignals]     = useState<any[]>([]);
   const [accounts,    setAccounts]    = useState<any[]>([]);
   const [performance, setPerformance] = useState<any>(null);
   const [alerts,      setAlerts]      = useState<any[]>([]);
@@ -512,9 +454,7 @@ export default function Dashboard() {
       case 'performance': return <PerformanceTab trades={allTrades} />;
       case 'reports':     return <Reports />;
       case 'plan':       return <PlanPage />;
-      case 'bias':        return <Bias />;
       case 'insights':    return isPro ? <Insights /> : <div style={{ textAlign:'center', padding:60, color:'#556080' }}>Available on Pro plan</div>;
-      case 'signals':     return isElite ? <SignalsTab signals={signals} onRefresh={loadData} /> : <div style={{ textAlign:'center', padding:60, color:'#556080' }}>Available on Elite plan</div>;
       case 'settings':    return <Settings />;
       default:            return null;
     }

@@ -1,328 +1,361 @@
 import React, { useState, useEffect } from 'react';
-import api, { getTrades } from '../../api/client';
-import { useAuth } from '../../context/AuthContext';
+import api from '../../api/client';
+import { getAccounts } from '../../api/client';
 
-const ADMIN_EMAIL = 'pnara9504@gmail.com';
-
-function StatBar({ label, value, max, color }: any) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+function ScoreBar({ label, value, prev }: any) {
+  const color = value >= 75 ? '#00C97A' : value >= 50 ? '#F0A500' : '#f04060';
+  const change = prev !== undefined ? value - prev : null;
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-        <span style={{ fontSize: 11, color: '#8899b4' }}>{label}</span>
-        <span style={{ fontSize: 11, color: '#E8ECF4', fontWeight: 700 }}>{value}</span>
-      </div>
-      <div style={{ height: 6, background: '#1a1f30', borderRadius: 3 }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color || '#00C97A',
-          borderRadius: 3, transition: 'width 1s ease' }}/>
-      </div>
-    </div>
-  );
-}
-
-function InsightCard({ icon, title, content, color, type }: any) {
-  const borderColor = type === 'warning' ? '#f04060' :
-                      type === 'positive' ? '#00C97A' : '#4090f0';
-  return (
-    <div style={{
-      background: '#0c0f1a', border: `1px solid ${borderColor}30`,
-      borderLeft: `3px solid ${borderColor}`,
-      borderRadius: 8, padding: '16px 20px', marginBottom: 12,
-    }}>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 20 }}>{icon}</span>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#E8ECF4',
-            marginBottom: 6 }}>{title}</div>
-          <div style={{ fontSize: 12, color: '#8899b4', lineHeight: 1.7 }}>{content}</div>
+    <div style={{ marginBottom:14 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+        <span style={{ fontSize:12, color:'#8899b4' }}>{label}</span>
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          {change !== null && (
+            <span style={{ fontSize:10, color: change > 0 ? '#00C97A' : change < 0 ? '#f04060' : '#556080' }}>
+              {change > 0 ? `↑ +${change}` : change < 0 ? `↓ ${change}` : '→'}
+            </span>
+          )}
+          <span style={{ fontSize:14, fontWeight:700, color, fontFamily:'Georgia,serif' }}>{value}/100</span>
         </div>
       </div>
+      <div style={{ height:6, background:'#111626', borderRadius:3, overflow:'hidden' }}>
+        <div style={{ width:`${value}%`, height:'100%', background:color,
+          borderRadius:3, transition:'width .6s ease' }}/>
+      </div>
     </div>
   );
 }
 
-function ProjectionCard({ current, projected, label }: any) {
-  const positive = projected >= 0;
+function DNARow({ label, items, color }: any) {
+  if (!items || items.length === 0) return null;
   return (
-    <div style={{ background: '#0c0f1a', border: '1px solid #1a1f30',
-      borderRadius: 8, padding: '20px 24px', textAlign: 'center' }}>
-      <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
-        letterSpacing: '.08em', marginBottom: 12 }}>{label}</div>
-      <div style={{ fontSize: 36, fontWeight: 700,
-        color: positive ? '#00C97A' : '#f04060',
-        fontFamily: 'Georgia,serif' }}>
-        {positive ? '+' : ''}{projected.toFixed(0)}
-      </div>
-      <div style={{ fontSize: 11, color: '#556080', marginTop: 6 }}>
-        Based on current trajectory
-      </div>
+    <div style={{ marginBottom:10 }}>
+      <div style={{ fontSize:10, color, textTransform:'uppercase' as const,
+        letterSpacing:'.08em', marginBottom:6, fontWeight:700 }}>{label}</div>
+      {items.map((item: any, i: number) => (
+        <div key={i} style={{ display:'flex', justifyContent:'space-between',
+          padding:'6px 10px', background:'#111626', borderRadius:4, marginBottom:4 }}>
+          <span style={{ fontSize:12, color:'#E8ECF4' }}>
+            {item.value || item.tag || item.sym || ''}
+          </span>
+          <span style={{ fontSize:11, fontWeight:700, color }}>
+            {item.pct}% of {label.toLowerCase().includes('win') ? 'wins' : 'losses'}
+          </span>
+        </div>
+      ))}
     </div>
+  );
+}
+
+function ConfidencePill({ confidence, count }: any) {
+  const color = confidence === 'High' ? '#00C97A' : confidence === 'Medium' ? '#F0A500' : '#556080';
+  return (
+    <span style={{ fontSize:9, padding:'2px 8px', borderRadius:3,
+      background:`${color}15`, color, fontWeight:700 }}>
+      {confidence} confidence · {count} trades
+    </span>
   );
 }
 
 export default function Insights() {
-  const { tenant } = useAuth();
-  const isAdmin = tenant?.email === ADMIN_EMAIL;
-
-  const [trades,    setTrades]    = useState<any[]>([]);
+  const [accounts,  setAccounts]  = useState<any[]>([]);
+  const [accountId, setAccountId] = useState('');
+  const [insights,  setInsights]  = useState<any>(null);
   const [loading,   setLoading]   = useState(true);
-  const [analysing, setAnalysing] = useState(false);
-  const [insight,   setInsight]   = useState<any>(null);
-  const [lastRun,   setLastRun]   = useState<string|null>(null);
-  const [canRun,    setCanRun]    = useState(false);
+  const [running,   setRunning]   = useState(false);
 
   useEffect(() => {
-    loadData();
-    checkLastRun();
-  }, []); // eslint-disable-line
+    getAccounts().then(r => {
+      const accs = r.data || [];
+      setAccounts(accs);
+      if (accs.length) setAccountId(accs[0].id);
+    }).catch(() => {});
+  }, []);
 
-  const loadData = async () => {
-    try {
-      const r = await getTrades({ status: 'CLOSED', period: 'all' });
-      setTrades(r.data || []);
+  useEffect(() => {
+    if (!accountId) return;
+    setLoading(true);
+    api.get(`/api/v1/insights/latest?account_id=${accountId}`)
+      .then(r => setInsights(r.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    // Auto-check weekly
+    api.get(`/api/v1/insights/check?account_id=${accountId}`)
+      .then(r => { if (r.data?.status === 'running') setRunning(true); })
+      .catch(() => {});
+  }, [accountId]);
 
-    } catch(e) {}
-    setLoading(false);
-  };
-
-  const checkLastRun = async () => {
-    try {
-      const r = await api.get('/api/v1/insights/last');
-      if (r.data?.last_run) {
-        setLastRun(r.data.last_run);
-        setInsight(r.data.insight);
-        const lastDate = new Date(r.data.last_run);
-        const daysSince = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
-        setCanRun(isAdmin || daysSince >= 7);
-      } else {
-        setCanRun(true);
-      }
-    } catch(e) { setCanRun(true); }
-  };
-
-  const runAnalysis = async () => {
-    setAnalysing(true);
-    try {
-      const r = await api.post('/api/v1/insights/analyse');
-      setInsight(r.data);
-      setLastRun(new Date().toISOString());
-      setCanRun(false);
-    } catch(e) { console.error(e); }
-    setAnalysing(false);
-  };
-
-  const totalTrades = trades.length;
-  const wins   = trades.filter(t => (t.execution_outcome||'').startsWith('WIN')).length;
-  const losses = trades.filter(t => (t.execution_outcome||'').startsWith('LOSS')).length;
-  const netPnl = trades.reduce((s,t) => s + parseFloat(t.net_pnl||0), 0);
-  const winRate = totalTrades > 0 ? (wins/totalTrades*100).toFixed(1) : '0';
-
-  // By session
-  const bySession: Record<string, {wins:number;losses:number;pnl:number}> = {};
-  trades.forEach(t => {
-    const s = t.session || 'Unknown';
-    if (!bySession[s]) bySession[s] = {wins:0,losses:0,pnl:0};
-    if ((t.execution_outcome||'').startsWith('WIN')) bySession[s].wins++;
-    else bySession[s].losses++;
-    bySession[s].pnl += parseFloat(t.net_pnl||0);
-  });
-
-  // By symbol
-  const bySymbol: Record<string, {wins:number;losses:number;pnl:number;count:number}> = {};
-  trades.forEach(t => {
-    if (!bySymbol[t.symbol]) bySymbol[t.symbol] = {wins:0,losses:0,pnl:0,count:0};
-    bySymbol[t.symbol].count++;
-    bySymbol[t.symbol].pnl += parseFloat(t.net_pnl||0);
-    if ((t.execution_outcome||'').startsWith('WIN')) bySymbol[t.symbol].wins++;
-    else bySymbol[t.symbol].losses++;
-  });
-
-  // Weekly projection
-  const weeksTrading = Math.max(1, totalTrades / 5);
-  const weeklyAvg = netPnl / weeksTrading;
-  const yearEndProjection = weeklyAvg * 52;
+  const a = insights?.analysis;
+  const scores = a?.behavioural_scores;
+  const dna    = a?.trading_dna;
+  const drift  = a?.behaviour_drift;
 
   return (
-    <div style={{ padding: '24px 28px', maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ padding:'24px 28px', maxWidth:1100, margin:'0 auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-start', marginBottom: 32 }}>
+      <div style={{ display:'flex', justifyContent:'space-between',
+        alignItems:'flex-start', marginBottom:28 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, fontFamily: 'Georgia,serif',
-            color: '#E8ECF4', marginBottom: 6 }}>Trading Insights</h1>
-          <p style={{ fontSize: 12, color: '#556080' }}>
-            {totalTrades} trades analysed · {lastRun
-              ? `Last run: ${new Date(lastRun).toLocaleDateString()}`
-              : 'Not yet run'}
+          <h1 style={{ fontSize:22, fontWeight:700, fontFamily:'Georgia,serif',
+            color:'#E8ECF4', marginBottom:4 }}>Behavioural Intelligence</h1>
+          <p style={{ color:'#556080', fontSize:12 }}>
+            Automatic analysis of your trading behaviour — updated weekly
           </p>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <button
-            onClick={runAnalysis}
-            disabled={analysing || !canRun || totalTrades < 10}
-            style={{
-              padding: '10px 24px',
-              background: canRun && totalTrades >= 10 ? '#9060f0' : '#1a1f30',
-              border: 'none', borderRadius: 8,
-              color: canRun && totalTrades >= 10 ? '#fff' : '#556080',
-              fontSize: 12, fontWeight: 700, cursor: canRun && totalTrades >= 10 ? 'pointer' : 'not-allowed',
-              letterSpacing: '.06em',
-            }}>
-            {analysing ? '🧠 Analysing...' :
-             totalTrades < 10 ? `Need ${10 - totalTrades} more trades` :
-             !canRun ? 'Available next week' :
-             '🔄 Run Now'}
-          </button>
-          {!isAdmin && !canRun && (
-            <div style={{ fontSize: 10, color: '#556080', marginTop: 4 }}>
-              Weekly analysis — Pro/Elite plan
-            </div>
+        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+          {accounts.length > 1 && (
+            <select value={accountId} onChange={e => setAccountId(e.target.value)}
+              style={{ padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
+                borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit' }}>
+              {accounts.map((a:any) => (
+                <option key={a.id} value={a.id}>{a.label || a.server}</option>
+              ))}
+            </select>
           )}
-          {isAdmin && (
-            <div style={{ fontSize: 10, color: '#9060f0', marginTop: 4 }}>Admin — unlimited runs</div>
+          {running && (
+            <span style={{ fontSize:11, color:'#9060f0', padding:'6px 12px',
+              background:'rgba(144,96,240,.08)', borderRadius:5 }}>
+              🧠 Analysing...
+            </span>
           )}
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', color: '#556080', padding: 60 }}>Loading...</div>
+        <div style={{ textAlign:'center', color:'#556080', padding:'60px 0' }}>Loading...</div>
+      ) : !a ? (
+        <div style={{ textAlign:'center', padding:'80px 0' }}>
+          <div style={{ fontSize:48, marginBottom:16 }}>🧠</div>
+          <h2 style={{ fontSize:20, fontWeight:700, fontFamily:'Georgia,serif',
+            color:'#E8ECF4', marginBottom:8 }}>Behavioural analysis not yet available</h2>
+          <p style={{ color:'#556080', fontSize:13, maxWidth:440, margin:'0 auto 16px', lineHeight:1.7 }}>
+            Analysis runs automatically each week after your first 10 trades.
+            Your patterns and tendencies will appear here as your trade history builds.
+          </p>
+          <div style={{ fontSize:11, color:'#3a4560' }}>
+            Available on Pro, Elite and Prop plans
+          </div>
+        </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
 
-          {/* LEFT COLUMN */}
-          <div>
-            {/* Stats overview */}
-            <div style={{ background: '#0c0f1a', border: '1px solid #1a1f30',
-              borderRadius: 8, padding: '20px', marginBottom: 16 }}>
-              <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
-                letterSpacing: '.08em', marginBottom: 16 }}>Overview</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-                {[
-                  { l: 'Total Trades', v: totalTrades, c: '#E8ECF4' },
-                  { l: 'Win Rate', v: `${winRate}%`, c: parseFloat(winRate) >= 50 ? '#00C97A' : '#f04060' },
-                  { l: 'Net P&L', v: `${netPnl >= 0 ? '+' : ''}${netPnl.toFixed(2)}`, c: netPnl >= 0 ? '#00C97A' : '#f04060' },
-                  { l: 'Wins / Losses', v: `${wins}W / ${losses}L`, c: '#8899b4' },
-                ].map(s => (
-                  <div key={s.l} style={{ background: '#111626', borderRadius: 6, padding: '12px 14px' }}>
-                    <div style={{ fontSize: 9, color: '#556080', textTransform: 'uppercase',
-                      letterSpacing: '.08em', marginBottom: 4 }}>{s.l}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: s.c }}>{s.v}</div>
-                  </div>
-                ))}
+          {/* NARRATIVE — THE STAR */}
+          <div style={{ background:'rgba(144,96,240,0.06)',
+            border:'1px solid rgba(144,96,240,0.25)', borderRadius:8, padding:24 }}>
+            <div style={{ display:'flex', justifyContent:'space-between',
+              alignItems:'center', marginBottom:14 }}>
+              <div style={{ fontSize:10, color:'#9060f0', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700 }}>
+                🧠 Behavioural Intelligence Report
+              </div>
+              {a.trader_profile && (
+                <span style={{ padding:'4px 12px', borderRadius:20, fontSize:11, fontWeight:700,
+                  background:'rgba(144,96,240,.15)', color:'#9060f0' }}>
+                  {a.trader_profile}
+                </span>
+              )}
+            </div>
+            <p style={{ fontSize:14, color:'#E8ECF4', lineHeight:1.9,
+              fontFamily:'Georgia,serif', margin:0 }}>
+              {a.narrative}
+            </p>
+            {insights.generated_at && (
+              <div style={{ fontSize:10, color:'#3a4560', marginTop:12 }}>
+                Last updated: {new Date(insights.generated_at).toLocaleDateString('en',
+                  {weekday:'long',day:'numeric',month:'long'})}
+              </div>
+            )}
+          </div>
+
+          {/* BEHAVIOURAL SCORECARD */}
+          {scores && (
+            <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
+              borderRadius:8, padding:24 }}>
+              <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:20 }}>
+                Behavioural Scorecard
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 40px' }}>
+                <ScoreBar label="Discipline"          value={scores.discipline} />
+                <ScoreBar label="Risk Consistency"    value={scores.risk_consistency} />
+                <ScoreBar label="Patience"            value={scores.patience} />
+                <ScoreBar label="Emotional Stability" value={scores.emotional_stability} />
+                <ScoreBar label="Rule Adherence"      value={scores.rule_adherence} />
               </div>
 
-              {/* By session */}
-              <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
-                letterSpacing: '.08em', marginBottom: 12 }}>Win Rate by Session</div>
-              {Object.entries(bySession).map(([session, data]) => {
-                const total = data.wins + data.losses;
-                const wr = total > 0 ? Math.round(data.wins/total*100) : 0;
-                return (
-                  <StatBar key={session} label={`${session} (${total} trades)`}
-                    value={`${wr}%`} max={100}
-                    color={wr >= 60 ? '#00C97A' : wr >= 40 ? '#F0A500' : '#f04060'} />
-                );
-              })}
-            </div>
-
-            {/* By symbol */}
-            <div style={{ background: '#0c0f1a', border: '1px solid #1a1f30',
-              borderRadius: 8, padding: '20px', marginBottom: 16 }}>
-              <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
-                letterSpacing: '.08em', marginBottom: 16 }}>Performance by Instrument</div>
-              {Object.entries(bySymbol)
-                .sort((a,b) => b[1].pnl - a[1].pnl)
-                .slice(0, 8)
-                .map(([symbol, data]) => {
-                  const total = data.wins + data.losses;
-                  const wr = total > 0 ? Math.round(data.wins/total*100) : 0;
-                  return (
-                    <div key={symbol} style={{ display: 'flex', justifyContent: 'space-between',
-                      alignItems: 'center', padding: '8px 0',
-                      borderBottom: '1px solid #111626' }}>
-                      <div>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#E8ECF4' }}>{symbol}</span>
-                        <span style={{ fontSize: 10, color: '#556080', marginLeft: 8 }}>{data.count} trades</span>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 12, fontWeight: 700,
-                          color: data.pnl >= 0 ? '#00C97A' : '#f04060' }}>
-                          {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(2)}
-                        </div>
-                        <div style={{ fontSize: 10, color: '#556080' }}>{wr}% WR</div>
+              {/* Expectancy */}
+              <div style={{ marginTop:20, padding:'14px 16px',
+                background: scores.expectancy >= 0 ? 'rgba(0,201,122,.05)' : 'rgba(240,64,96,.05)',
+                border:`1px solid ${scores.expectancy >= 0 ? 'rgba(0,201,122,.2)' : 'rgba(240,64,96,.2)'}`,
+                borderRadius:6 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <div>
+                    <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
+                      letterSpacing:'.08em', marginBottom:4 }}>Expectancy per trade</div>
+                    <div style={{ fontSize:24, fontWeight:700, fontFamily:'Georgia,serif',
+                      color: scores.expectancy >= 0 ? '#00C97A' : '#f04060' }}>
+                      {scores.expectancy >= 0 ? '+' : ''}{scores.expectancy?.toFixed(2)}
+                    </div>
+                  </div>
+                  <div style={{ textAlign:'right' as const, display:'flex', gap:16 }}>
+                    <div>
+                      <div style={{ fontSize:9, color:'#556080', marginBottom:3 }}>Avg Win</div>
+                      <div style={{ fontSize:14, fontWeight:700, color:'#00C97A' }}>
+                        +{scores.avg_win?.toFixed(2)}
                       </div>
                     </div>
-                  );
-                })}
+                    <div>
+                      <div style={{ fontSize:9, color:'#556080', marginBottom:3 }}>Avg Loss</div>
+                      <div style={{ fontSize:14, fontWeight:700, color:'#f04060' }}>
+                        {scores.avg_loss?.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {scores.expectancy < 0 && (
+                  <div style={{ fontSize:11, color:'#f04060', marginTop:8 }}>
+                    Negative expectancy — losses exceed wins on average despite win rate
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STRENGTHS & WEAKNESSES */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+            <div style={{ background:'rgba(0,201,122,.04)',
+              border:'1px solid rgba(0,201,122,.15)', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:14 }}>✓ Strengths</div>
+              {(a.strengths||[]).map((s:string,i:number) => (
+                <div key={i} style={{ fontSize:12, color:'#8899b4', lineHeight:1.7,
+                  marginBottom:8, paddingLeft:12, borderLeft:'2px solid rgba(0,201,122,.3)' }}>
+                  {s}
+                </div>
+              ))}
+            </div>
+            <div style={{ background:'rgba(240,64,96,.04)',
+              border:'1px solid rgba(240,64,96,.15)', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#f04060', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:14 }}>⚠ Patterns to address</div>
+              {(a.weaknesses||[]).map((s:string,i:number) => (
+                <div key={i} style={{ fontSize:12, color:'#8899b4', lineHeight:1.7,
+                  marginBottom:8, paddingLeft:12, borderLeft:'2px solid rgba(240,64,96,.3)' }}>
+                  {s}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div>
-            {/* Year projection */}
-            <div style={{ background: '#0c0f1a', border: '1px solid #1a1f30',
-              borderRadius: 8, padding: '20px', marginBottom: 16 }}>
-              <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
-                letterSpacing: '.08em', marginBottom: 16 }}>Year-End Projection</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-                <ProjectionCard label="Projected Annual P&L"
-                  projected={yearEndProjection} current={netPnl} />
-                <ProjectionCard label="Next 30 Days"
-                  projected={weeklyAvg * 4.3} current={0} />
+          {/* BEHAVIOUR CONTRADICTIONS */}
+          {(a.behaviour_contradictions||[]).length > 0 && (
+            <div style={{ background:'rgba(240,160,0,.05)',
+              border:'1px solid rgba(240,160,0,.2)', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#F0A500', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:14 }}>
+                🔍 Behavioural Contradictions Detected
               </div>
-              <div style={{ fontSize: 11, color: '#3a4560', lineHeight: 1.6 }}>
-                Based on {weeksTrading.toFixed(1)} weeks of trading data.
-                Projection assumes consistent performance. Recent trades weighted more heavily.
+              {(a.behaviour_contradictions||[]).map((s:string,i:number) => (
+                <div key={i} style={{ fontSize:12, color:'#E8ECF4', lineHeight:1.7,
+                  marginBottom:8, padding:'10px 14px', background:'rgba(240,160,0,.05)',
+                  borderRadius:5 }}>
+                  {s}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TRADING DNA */}
+          {dna && dna.sample_size >= 20 && (
+            <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
+              borderRadius:8, padding:24 }}>
+              <div style={{ display:'flex', justifyContent:'space-between',
+                alignItems:'center', marginBottom:16 }}>
+                <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
+                  letterSpacing:'.1em', fontWeight:700 }}>Trading DNA</div>
+                <ConfidencePill confidence={dna.confidence} count={dna.sample_size} />
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }}>
+                <div>
+                  <DNARow label="Winning Sessions"  items={dna.winning_sessions}  color="#00C97A" />
+                  <DNARow label="Winning Symbols"   items={dna.winning_symbols}   color="#00C97A" />
+                  <DNARow label="Winning Patterns"  items={dna.winning_tags}      color="#00C97A" />
+                </div>
+                <div>
+                  <DNARow label="Losing Sessions"   items={dna.losing_sessions}   color="#f04060" />
+                  <DNARow label="Losing Symbols"    items={dna.losing_symbols}    color="#f04060" />
+                  <DNARow label="Losing Patterns"   items={dna.losing_tags}       color="#f04060" />
+                </div>
               </div>
             </div>
+          )}
 
-            {/* AI Insights */}
-            {insight ? (
-              <div style={{ background: '#0c0f1a', border: '1px solid #1a1f30',
-                borderRadius: 8, padding: '20px' }}>
-                <div style={{ fontSize: 10, color: '#9060f0', textTransform: 'uppercase',
-                  letterSpacing: '.08em', marginBottom: 16 }}>🧠 AI Analysis</div>
-
-                {insight.summary && (
-                  <div style={{ fontSize: 13, color: '#8899b4', lineHeight: 1.8,
-                    marginBottom: 20, padding: '14px 16px', background: '#111626',
-                    borderRadius: 6 }}>
-                    {insight.summary}
-                  </div>
-                )}
-
-                {insight.patterns?.map((p: any, i: number) => (
-                  <InsightCard key={i} icon={p.icon || '📊'}
-                    title={p.title} content={p.content} type={p.type} />
-                ))}
-
-                {insight.action_items?.length > 0 && (
-                  <div style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: 10, color: '#556080', textTransform: 'uppercase',
-                      letterSpacing: '.08em', marginBottom: 12 }}>Action Items</div>
-                    {insight.action_items.map((item: string, i: number) => (
-                      <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-                        <span style={{ color: '#00C97A', fontWeight: 700, flexShrink: 0 }}>{i+1}.</span>
-                        <span style={{ fontSize: 12, color: '#8899b4', lineHeight: 1.6 }}>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          {/* BEHAVIOUR DRIFT */}
+          {drift && (drift.drifts||[]).length > 0 && (
+            <div style={{ background:'rgba(240,64,96,.05)',
+              border:'1px solid rgba(240,64,96,.2)', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#f04060', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>
+                ⚡ Behaviour Drift Detected
               </div>
-            ) : (
-              <div style={{ background: '#0c0f1a', border: '1px solid #1a1f30',
-                borderRadius: 8, padding: '40px', textAlign: 'center' }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>🧠</div>
-                <div style={{ fontSize: 14, color: '#E8ECF4', fontWeight: 700, marginBottom: 8 }}>
-                  No analysis yet
+              {(drift.drifts||[]).map((d:string,i:number) => (
+                <div key={i} style={{ fontSize:12, color:'#E8ECF4', lineHeight:1.7,
+                  marginBottom:6, padding:'8px 12px', background:'rgba(240,64,96,.05)',
+                  borderRadius:4 }}>{d}</div>
+              ))}
+            </div>
+          )}
+
+          {/* WHAT IMPROVED */}
+          {(a.what_improved||[]).length > 0 && (
+            <div style={{ background:'rgba(0,201,122,.04)',
+              border:'1px solid rgba(0,201,122,.15)', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>
+                📈 What Improved
+              </div>
+              {(a.what_improved||[]).map((s:string,i:number) => (
+                <div key={i} style={{ fontSize:12, color:'#8899b4', lineHeight:1.7,
+                  marginBottom:6 }}>✓ {s}</div>
+              ))}
+            </div>
+          )}
+
+          {/* YEAR-END + TOP FOCUS */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+            {insights.year_end_pnl !== null && (
+              <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
+                borderRadius:8, padding:20 }}>
+                <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
+                  letterSpacing:'.08em', marginBottom:8 }}>Year-End Trajectory</div>
+                <div style={{ fontSize:28, fontWeight:700, fontFamily:'Georgia,serif',
+                  color: insights.year_end_pnl >= 0 ? '#00C97A' : '#f04060', marginBottom:8 }}>
+                  {insights.year_end_pnl >= 0 ? '+$' : '-$'}{Math.abs(insights.year_end_pnl).toLocaleString()}
                 </div>
-                <div style={{ fontSize: 12, color: '#556080', lineHeight: 1.7 }}>
-                  {totalTrades < 10
-                    ? `Trade ${10 - totalTrades} more times to unlock AI analysis`
-                    : 'Click "Run AI Analysis" to get your personalised trading insights'}
+                <div style={{ fontSize:11, color:'#556080', lineHeight:1.6 }}>
+                  {a.year_end_narrative}
                 </div>
               </div>
             )}
+            {a.top_focus && (
+              <div style={{ background:'rgba(64,144,240,.05)',
+                border:'1px solid rgba(64,144,240,.2)', borderRadius:8, padding:20 }}>
+                <div style={{ fontSize:10, color:'#4090f0', textTransform:'uppercase' as const,
+                  letterSpacing:'.08em', marginBottom:8 }}>Key Behavioural Observation</div>
+                <div style={{ fontSize:13, color:'#E8ECF4', lineHeight:1.7 }}>
+                  {a.top_focus}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Disclaimer */}
+          <div style={{ padding:'12px 16px', background:'#070b14',
+            borderRadius:6, fontSize:10, color:'#3a4560', lineHeight:1.6,
+            fontStyle:'italic' }}>
+            This report is a behavioural analysis of your historical trading execution.
+            It does not constitute financial advice, investment recommendations, or trading signals.
+            Past patterns do not indicate future results. Always conduct your own analysis before trading.
           </div>
         </div>
       )}
