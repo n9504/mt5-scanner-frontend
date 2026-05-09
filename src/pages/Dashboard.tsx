@@ -336,12 +336,14 @@ function PerformanceTab({ trades }: any) {
                   y2={10 + (maxEq/(maxEq-minEq))*120}
                   stroke="#252d42" strokeWidth="1" strokeDasharray="3,3"/>
               )}
-              {/* Equity line */}
-              <g transform="translate(0,10) scale(0.85,1.2)">
-                <polyline points={pts} fill="none"
-                  stroke={netPnl>=0?"#00C97A":"#f04060"} strokeWidth="1.5"/>
-                <polygon points={`0,100 ${pts} 100,100`} fill="url(#eqG)"/>
-              </g>
+              {/* Equity line - full width */}
+              <polyline points={pts} fill="none"
+                stroke={netPnl>=0?"#00C97A":"#f04060"} strokeWidth="1.5"
+                transform="translate(0,10) scale(0.88,1.2)"/>
+              <polygon points={`0,${10+120} ${pts.split(' ').map((p:string) => {
+                const [x,y] = p.split(',');
+                return `${parseFloat(x)*0.88},${10+parseFloat(y)*1.2}`;
+              }).join(' ')} ${88},${10+120}`} fill="url(#eqG)"/>
               {/* X axis date labels */}
               {[0,0.25,0.5,0.75,1].map((pct,i) => {
                 const idx2 = Math.floor(pct*(trades.length-1));
@@ -349,7 +351,7 @@ function PerformanceTab({ trades }: any) {
                 if (!t) return null;
                 const d = new Date(t.close_time||t.open_time);
                 return (
-                  <text key={i} x={`${pct*85}%`} y="155"
+                  <text key={i} x={`${pct*88}%`} y="155"
                     fill="#3a4560" fontSize="9" fontFamily="Inter,sans-serif" textAnchor="middle">
                     {d.getUTCDate()}/{d.getUTCMonth()+1}
                   </text>

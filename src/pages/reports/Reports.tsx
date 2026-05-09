@@ -176,6 +176,39 @@ export default function Reports() {
             </div>
           )}
 
+          {/* Behaviour tag performance */}
+          {tagList.filter((t:any) => ['Calm','Fear','Greed','Disciplined','Panic','Strategic','Impatient','Revenge'].includes(t.tag)).length > 0 && (
+            <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:11, color:'#556080', textTransform:'uppercase' as const,
+                letterSpacing:'.08em', marginBottom:14 }}>Behaviour Tag Performance</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:8 }}>
+                {['Calm','Disciplined','Strategic','Patient','Fear','Greed','Revenge','Panic','Impatient']
+                  .filter(tag => byTag[tag])
+                  .map(tag => {
+                    const d = byTag[tag];
+                    const total = d.wins + d.losses;
+                    const wr = total > 0 ? Math.round(d.wins/total*100) : 0;
+                    const pnl = parseFloat(d.pnl.toFixed(2));
+                    const isPositive = ['Calm','Disciplined','Strategic','Patient'].includes(tag);
+                    const color = wr >= 55 ? '#00C97A' : wr >= 40 ? '#F0A500' : '#f04060';
+                    return (
+                      <div key={tag} style={{ background:'#111626', borderRadius:6, padding:'12px 14px',
+                        borderLeft:`3px solid ${isPositive ? '#00C97A' : '#f04060'}` }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#E8ECF4', marginBottom:6 }}>{tag}</div>
+                        <div style={{ fontSize:18, fontWeight:700, color, fontFamily:'Georgia,serif' }}>{wr}%</div>
+                        <div style={{ fontSize:10, color:'#556080', marginTop:4 }}>
+                          {total} trades · {pnl>=0?'+$':'-$'}{Math.abs(pnl/total).toFixed(2)}/trade
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+              <div style={{ fontSize:11, color:'#556080', fontStyle:'italic' as const }}>
+                Calm trading = highest win rate in most traders. Emotion-driven trades cost money.
+              </div>
+            </div>
+          )}
+
           {/* Best/worst trades */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
             <div style={{ background:'#0c0f1a', border:'1px solid rgba(0,201,122,.15)', borderRadius:8, padding:20 }}>

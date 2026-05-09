@@ -367,7 +367,7 @@ export default function Landing() {
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00C97A',
             animation: 'pulse 2s infinite' }}/>
           <span style={{ fontSize: 11, color: '#00C97A', letterSpacing: '.08em',
-            textTransform: 'uppercase' }}>AI-Powered Trading Journal</span>
+            textTransform: 'uppercase' }}>The World's First Fully Automated Trading Journal</span>
         </div>
 
         <h1 className="slide-up-2" style={{

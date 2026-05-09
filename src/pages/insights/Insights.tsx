@@ -80,6 +80,7 @@ export default function Insights() {
     try {
       const r = await getTrades({ status: 'CLOSED', period: 'all' });
       setTrades(r.data || []);
+
     } catch(e) {}
     setLoading(false);
   };
@@ -170,7 +171,7 @@ export default function Insights() {
             {analysing ? '🧠 Analysing...' :
              totalTrades < 10 ? `Need ${10 - totalTrades} more trades` :
              !canRun ? 'Available next week' :
-             '🧠 Run AI Analysis'}
+             '🔄 Run Now'}
           </button>
           {!isAdmin && !canRun && (
             <div style={{ fontSize: 10, color: '#556080', marginTop: 4 }}>
