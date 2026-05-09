@@ -52,33 +52,45 @@ function MainTab({ openTrades, trades, accounts, performance, alerts, setAlerts 
   const account = accounts?.[0];
   const balance = parseFloat(account?.balance || 0);
 
-  // Best/worst case from open trades
+  // Scenario analysis from open trades - use actual tick_value/tick_size from broker
   const bestCase = openTrades.reduce((s: number, t: any) => {
-    const e = parseFloat(t.entry_price || 0);
+    const e  = parseFloat(t.entry_price || 0);
     const tp = parseFloat(t.tp || 0);
     const lot = parseFloat(t.lot || 0);
+    const tickVal  = parseFloat(t.tick_value || 0);
+    const tickSize = parseFloat(t.tick_size || 0);
     if (!tp || !e || !lot) return s;
+    if (tickVal && tickSize) {
+      // Use actual broker tick values
+      const dist = Math.abs(tp - e);
+      const pnl  = (dist / tickSize) * tickVal * lot;
+      return s + (t.bias === 'BUY' ? (tp > e ? pnl : -pnl) : (tp < e ? pnl : -pnl));
+    }
+    // Fallback approximation
     const sym = t.symbol || '';
-    const isJPY = sym.includes('JPY');
-    const isXAU = sym === 'XAUUSD';
-    const tickSize = isJPY ? 0.01 : isXAU ? 0.01 : 0.0001;
-    const tickVal  = isJPY ? 1000 : isXAU ? 1 : 10;
-    const pips = Math.abs(tp - e) / tickSize;
-    return s + (t.bias === 'BUY' ? 1 : -1) * (tp > e ? 1 : -1) * pips * tickVal * lot;
+    const isJPY = sym.includes('JPY'); const isXAU = sym === 'XAUUSD';
+    const tSize = isJPY ? 0.01 : isXAU ? 0.01 : 0.0001;
+    const tVal  = isJPY ? 1000 : isXAU ? 1 : 10;
+    return s + (t.bias === 'BUY' ? 1 : -1) * (tp > e ? 1 : -1) * (Math.abs(tp-e)/tSize) * tVal * lot;
   }, 0);
 
   const worstCase = openTrades.reduce((s: number, t: any) => {
-    const e = parseFloat(t.entry_price || 0);
+    const e  = parseFloat(t.entry_price || 0);
     const sl = parseFloat(t.sl || 0);
     const lot = parseFloat(t.lot || 0);
+    const tickVal  = parseFloat(t.tick_value || 0);
+    const tickSize = parseFloat(t.tick_size || 0);
     if (!sl || !e || !lot) return s;
+    if (tickVal && tickSize) {
+      const dist = Math.abs(sl - e);
+      const pnl  = (dist / tickSize) * tickVal * lot;
+      return s - pnl;
+    }
     const sym = t.symbol || '';
-    const isJPY = sym.includes('JPY');
-    const isXAU = sym === 'XAUUSD';
-    const tickSize = isJPY ? 0.01 : isXAU ? 0.01 : 0.0001;
-    const tickVal  = isJPY ? 1000 : isXAU ? 1 : 10;
-    const pips = Math.abs(sl - e) / tickSize;
-    return s - pips * tickVal * lot;
+    const isJPY = sym.includes('JPY'); const isXAU = sym === 'XAUUSD';
+    const tSize = isJPY ? 0.01 : isXAU ? 0.01 : 0.0001;
+    const tVal  = isJPY ? 1000 : isXAU ? 1 : 10;
+    return s - (Math.abs(sl-e)/tSize) * tVal * lot;
   }, 0);
 
   return (
@@ -103,11 +115,11 @@ function MainTab({ openTrades, trades, accounts, performance, alerts, setAlerts 
               <div style={{ display: 'flex', gap: 8 }}>
                 <span style={{ fontSize: 10, background: 'rgba(0,201,122,.08)', border: '1px solid rgba(0,201,122,.2)',
                   borderRadius: 4, padding: '3px 8px', color: '#00C97A' }}>
-                  Best {account?.currency} {(balance + bestCase).toFixed(2)}
+                  All TP Hit {bestCase >= 0 ? '+' : ''}{bestCase.toFixed(2)}
                 </span>
                 <span style={{ fontSize: 10, background: 'rgba(240,64,96,.08)', border: '1px solid rgba(240,64,96,.2)',
                   borderRadius: 4, padding: '3px 8px', color: '#f04060' }}>
-                  Worst {account?.currency} {(balance + worstCase).toFixed(2)}
+                  All SL Hit {worstCase.toFixed(2)}
                 </span>
               </div>
             )}
