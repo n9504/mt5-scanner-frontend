@@ -412,7 +412,7 @@ export default function Dashboard() {
       setAccounts(accRes.data);
       setPerformance(perfRes.data);
 
-      const [tradeRes, allTradeRes, openRes, sigRes, alertRes] = await Promise.all([
+      const [tradeRes, allTradeRes, openRes, alertRes] = await Promise.all([
         getTrades({ status: 'CLOSED', period: 'today' }).catch(() => ({ data: [] })),
         getTrades({ status: 'CLOSED', period: 'all' }).catch(() => ({ data: [] })),
         getTrades({ status: 'OPEN' }).catch(() => ({ data: [] })),
@@ -422,7 +422,6 @@ export default function Dashboard() {
       setTrades(tradeRes.data);
       setAllTrades(allTradeRes.data);
       setOpenTrades(openRes.data);
-      setSignals(sigRes.data);
       setAlerts(alertRes.data || []);
 
       const setupSeen = localStorage.getItem('setup_seen');
