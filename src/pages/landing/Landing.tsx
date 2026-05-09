@@ -554,11 +554,11 @@ export default function Landing() {
             <div style={{ fontSize: 11, color: '#00C97A', textTransform: 'uppercase',
               letterSpacing: '.12em', marginBottom: 12 }}>About</div>
             <h2 style={{ fontSize: 28, fontWeight: 700, fontFamily: 'Georgia,serif',
-              marginBottom: 16, lineHeight: 1.3 }}>Built by traders, for traders</h2>
+              marginBottom: 16, lineHeight: 1.3 }}>Built for traders who want to improve</h2>
             <p style={{ color: '#556080', fontSize: 13, lineHeight: 1.8 }}>
-              TradePattrnly was built out of frustration with expensive, complex trading journals
-              that don't actually help you improve. We combined automatic trade tracking with
-              genuine AI analysis to give you the insights that matter.
+              TradePattrnly was built for traders who want to understand themselves, not just track trades.
+              We combine automatic trade capture with genuine AI behavioural analysis — so you can
+              discover what you actually trade, and master what works.
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
