@@ -298,6 +298,39 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                             borderRadius:6, padding:'14px 16px', marginBottom:8 }}>
                             <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
                               letterSpacing:'.08em', marginBottom:12 }}>📊 Entry Analysis</div>
+
+                            {/* AI detected setup tags - confirmation UI */}
+                            {ea.setup_tags && ea.setup_tags.length > 0 && (
+                              <div style={{ marginBottom:12 }}>
+                                <div style={{ fontSize:9, color:'#556080', marginBottom:6,
+                                  textTransform:'uppercase' as const, letterSpacing:'.06em' }}>
+                                  AI Detected Setup
+                                </div>
+                                <div style={{ display:'flex', flexWrap:'wrap' as const, gap:5 }}>
+                                  {ea.setup_tags.map((tag:string, i:number) => (
+                                    <span key={i} style={{ padding:'3px 10px', borderRadius:3,
+                                      fontSize:10, fontWeight:700,
+                                      background:'rgba(64,144,240,.1)', color:'#4090f0',
+                                      border:'1px solid rgba(64,144,240,.2)' }}>{tag}</span>
+                                  ))}
+                                </div>
+                                {/* Hidden setup detection */}
+                                {(() => {
+                                  const userTags = trade.tags || [];
+                                  const userReversal = userTags.some((t:string) => ['Reversal','Reversal Attempt'].includes(t));
+                                  const aiContinuation = ea.setup_tags.some((t:string) => ['Trend Continuation','BOS','Breakout'].includes(t));
+                                  if (userReversal && aiContinuation) return (
+                                    <div style={{ marginTop:8, padding:'7px 10px',
+                                      background:'rgba(240,160,0,.06)',
+                                      border:'1px solid rgba(240,160,0,.2)', borderRadius:4,
+                                      fontSize:11, color:'#F0A500' }}>
+                                      🔍 Interesting pattern: you tagged this as reversal — chart analysis detected continuation structure. This feeds your behavioural report.
+                                    </div>
+                                  );
+                                  return null;
+                                })()}
+                              </div>
+                            )}
                             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
                               <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>ENTRY SCORE</div>

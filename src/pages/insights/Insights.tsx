@@ -167,6 +167,41 @@ export default function Insights() {
             )}
           </div>
 
+          {/* WEEKLY FOCUS — THE ACTIONABLE HOOK */}
+          {(a.weekly_focus) && (
+            <div style={{ background:'rgba(0,201,122,0.06)',
+              border:'1px solid rgba(0,201,122,0.3)', borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:10 }}>
+                🎯 This Week's Focus
+              </div>
+              <p style={{ fontSize:13, color:'#E8ECF4', lineHeight:1.8, margin:0 }}>
+                {a.weekly_focus}
+              </p>
+            </div>
+          )}
+
+          {/* TOP 3 PERFORMANCE IMPROVEMENTS */}
+          {(a.top_3_improvements||[]).length > 0 && (
+            <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
+              borderRadius:8, padding:20 }}>
+              <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
+                letterSpacing:'.1em', fontWeight:700, marginBottom:14 }}>
+                📊 Top Behavioural Observations
+              </div>
+              {(a.top_3_improvements||[]).map((obs:string, i:number) => (
+                <div key={i} style={{ padding:'10px 14px', background:'#111626',
+                  borderRadius:5, marginBottom:8, fontSize:12, color:'#8899b4',
+                  lineHeight:1.7, borderLeft:'2px solid #252d42' }}>
+                  <span style={{ color:'#4090f0', fontWeight:700, marginRight:8 }}>
+                    {i+1}.
+                  </span>
+                  {obs}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* BEHAVIOURAL SCORECARD */}
           {scores && (
             <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
@@ -327,13 +362,13 @@ export default function Insights() {
               <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
                 borderRadius:8, padding:20 }}>
                 <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
-                  letterSpacing:'.08em', marginBottom:8 }}>Year-End Trajectory</div>
+                  letterSpacing:'.08em', marginBottom:8 }}>Performance Trend Projection</div>
                 <div style={{ fontSize:28, fontWeight:700, fontFamily:'Georgia,serif',
                   color: insights.year_end_pnl >= 0 ? '#00C97A' : '#f04060', marginBottom:8 }}>
                   {insights.year_end_pnl >= 0 ? '+$' : '-$'}{Math.abs(insights.year_end_pnl).toLocaleString()}
                 </div>
                 <div style={{ fontSize:11, color:'#556080', lineHeight:1.6 }}>
-                  {a.year_end_narrative}
+                  {a.performance_trend_narrative || a.year_end_narrative}
                 </div>
               </div>
             )}

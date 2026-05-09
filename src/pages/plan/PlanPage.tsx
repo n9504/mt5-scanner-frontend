@@ -9,7 +9,8 @@ function StatusBadge({ status }: { status: string }) {
     EXCELLENT:  { label: '★ Excellent',    color: '#00C97A', bg: 'rgba(0,201,122,.15)' },
     PASS:       { label: '✓ Pass',         color: '#00C97A', bg: 'rgba(0,201,122,.10)' },
     RISKY:      { label: '⚠ Risky',        color: '#F0A500', bg: 'rgba(240,160,0,.12)' },
-    FAIL:       { label: '✗ Fail',         color: '#f04060', bg: 'rgba(240,64,96,.12)' },
+    UNPROFITABLE: { label: '✗ Unprofitable', color: '#f04060', bg: 'rgba(240,64,96,.12)' },
+    FAIL:       { label: '✗ Unprofitable', color: '#f04060', bg: 'rgba(240,64,96,.12)' },
     FUTURE:     { label: '— Upcoming',     color: '#3a4560', bg: 'transparent' },
   };
   const s = map[status] || { label: status, color: '#556080', bg: 'transparent' };
@@ -312,7 +313,7 @@ export default function PlanPage() {
             borderRadius:8, padding:20 }}>
             <div style={{ fontSize:10, color:'#00C97A', textTransform:'uppercase' as const,
               letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>
-              📈 Historical Edge — {todayDayName}s
+              📈 Historical Performance Pattern — {todayDayName}s
             </div>
             {topSymbols.length === 0 ? (
               <div style={{ color:'#3a4560', fontSize:12 }}>Not enough data yet</div>
@@ -410,13 +411,18 @@ export default function PlanPage() {
                         <td key={day} style={{ padding:'8px 12px', textAlign:'center' as const,
                           color:'#252d42', fontSize:11 }}>—</td>
                       );
-                      const wr = Math.round(d.wins/(d.wins+d.losses)*100);
+                      const total2 = d.wins+d.losses;
+                      const wr = Math.round(d.wins/total2*100);
+                      const conf = total2 >= 10 ? 1 : total2 >= 5 ? 0.75 : total2 >= 3 ? 0.5 : 0.3;
+                      const confLabel = total2 >= 10 ? '' : total2 >= 5 ? 'emerging' : 'weak';
                       const bg = wr>=60?'rgba(0,201,122,.08)':wr>=40?'rgba(240,160,0,.06)':'rgba(240,64,96,.06)';
                       const color = wr>=60?'#00C97A':wr>=40?'#F0A500':'#f04060';
                       return (
-                        <td key={day} style={{ padding:'8px 12px', textAlign:'center' as const, background:bg }}>
+                        <td key={day} style={{ padding:'8px 12px', textAlign:'center' as const,
+                          background:bg, opacity:conf }}>
                           <div style={{ fontSize:12, fontWeight:700, color }}>{wr}%</div>
-                          <div style={{ fontSize:9, color:'#556080' }}>{d.wins+d.losses}t</div>
+                          <div style={{ fontSize:9, color:'#556080' }}>{total2}t</div>
+                          {confLabel && <div style={{ fontSize:8, color:'#3a4560' }}>{confLabel}</div>}
                         </td>
                       );
                     })}
