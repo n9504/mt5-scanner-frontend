@@ -274,11 +274,7 @@ function PerformanceTab({ trades }: any) {
   const equity = trades.map((t:any) => { cum += parseFloat(t.net_pnl||0); return parseFloat(cum.toFixed(2)); });
   const maxEq = Math.max(...equity, 0.01);
   const minEq = Math.min(...equity, -0.01);
-  const range = maxEq - minEq || 1;
-  const pts = equity.length > 1
-    ? equity.map((v:number,i:number) =>
-        `${(i/(equity.length-1)*100).toFixed(1)},${(80-((v-minEq)/range*70+5)).toFixed(1)}`).join(' ')
-    : '';
+  const range = maxEq - minEq || 1; // eslint-disable-line @typescript-eslint/no-unused-vars
 
   // By symbol
   const bySymbol: any = {};
@@ -305,62 +301,66 @@ function PerformanceTab({ trades }: any) {
         <StatCard label="Trades"        value={`${wins.length}W / ${losses.length}L`} small />
       </div>
 
-      {equity.length > 1 && (
-        <div style={{ background:'#0c0f1a', border:'1px solid #111626', borderRadius:8, padding:20 }}>
-          <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
-            letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>Equity Curve</div>
-          <div style={{ position:'relative' as const, height:160 }}>
-            <svg width="100%" height="160" style={{ display:'block' }}>
+      {equity.length > 1 && (() => {
+        const W = 900; const H = 140;
+        const padL = 55; const padR = 10; const padT = 10; const padB = 25;
+        const chartW = W - padL - padR;
+        const chartH = H - padT - padB;
+        const color  = netPnl >= 0 ? '#00C97A' : '#f04060';
+        const toX = (i:number) => padL + (i / (equity.length-1)) * chartW;
+        const toY = (v:number) => padT + chartH - ((v - minEq) / (maxEq - minEq || 1)) * chartH;
+        const linePts = equity.map((v:number,i:number) => `${toX(i)},${toY(v)}`).join(' ');
+        const areaPts = `${padL},${padT+chartH} ${linePts} ${padL+chartW},${padT+chartH}`;
+        return (
+          <div style={{ background:'#0c0f1a', border:'1px solid #111626', borderRadius:8, padding:20 }}>
+            <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
+              letterSpacing:'.1em', fontWeight:700, marginBottom:12 }}>Equity Curve</div>
+            <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ display:'block', overflow:'visible' }}>
               <defs>
-                <linearGradient id="eqG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={netPnl>=0?"#00C97A":"#f04060"} stopOpacity="0.3"/>
-                  <stop offset="100%" stopColor={netPnl>=0?"#00C97A":"#f04060"} stopOpacity="0"/>
+                <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={color} stopOpacity="0.25"/>
+                  <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
                 </linearGradient>
               </defs>
-              {/* Y axis grid lines and labels */}
+              {/* Y grid + labels */}
               {[0,0.25,0.5,0.75,1].map((pct,i) => {
-                const price = maxEq - pct*(maxEq-minEq);
-                const y = 10 + pct*120;
+                const v = maxEq - pct*(maxEq-minEq);
+                const y = padT + pct*chartH;
                 return (
                   <g key={i}>
-                    <line x1="0" y1={y} x2="85%" y2={y} stroke="#111626" strokeWidth="1"/>
-                    <text x="87%" y={y+4} fill="#3a4560" fontSize="9" fontFamily="Inter,sans-serif">
-                      {price>=0?'+$':'-$'}{Math.abs(price).toFixed(0)}
+                    <line x1={padL} y1={y} x2={padL+chartW} y2={y} stroke="#111626" strokeWidth="0.5"/>
+                    <text x={padL-4} y={y+3} fill="#3a4560" fontSize="8" textAnchor="end" fontFamily="Inter,sans-serif">
+                      {v>=0?'+':''}{v.toFixed(0)}
                     </text>
                   </g>
                 );
               })}
               {/* Zero line */}
               {minEq < 0 && maxEq > 0 && (
-                <line x1="0" y1={10 + (maxEq/(maxEq-minEq))*120} x2="85%"
-                  y2={10 + (maxEq/(maxEq-minEq))*120}
+                <line x1={padL} y1={toY(0)} x2={padL+chartW} y2={toY(0)}
                   stroke="#252d42" strokeWidth="1" strokeDasharray="3,3"/>
               )}
-              {/* Equity line - full width */}
-              <polyline points={pts} fill="none"
-                stroke={netPnl>=0?"#00C97A":"#f04060"} strokeWidth="1.5"
-                transform="translate(0,10) scale(0.88,1.2)"/>
-              <polygon points={`0,${10+120} ${pts.split(' ').map((p:string) => {
-                const [x,y] = p.split(',');
-                return `${parseFloat(x)*0.88},${10+parseFloat(y)*1.2}`;
-              }).join(' ')} ${88},${10+120}`} fill="url(#eqG)"/>
-              {/* X axis date labels */}
-              {[0,0.25,0.5,0.75,1].map((pct,i) => {
-                const idx2 = Math.floor(pct*(trades.length-1));
+              {/* Fill */}
+              <polygon points={areaPts} fill="url(#eqFill)"/>
+              {/* Line */}
+              <polyline points={linePts} fill="none" stroke={color} strokeWidth="1.5"/>
+              {/* X date labels */}
+              {[0,0.2,0.4,0.6,0.8,1].map((pct,i) => {
+                const idx2 = Math.min(equity.length-1, Math.floor(pct*(equity.length-1)));
                 const t = trades[idx2];
                 if (!t) return null;
                 const d = new Date(t.close_time||t.open_time);
                 return (
-                  <text key={i} x={`${pct*88}%`} y="155"
-                    fill="#3a4560" fontSize="9" fontFamily="Inter,sans-serif" textAnchor="middle">
+                  <text key={i} x={toX(idx2)} y={H-4}
+                    fill="#3a4560" fontSize="8" textAnchor="middle" fontFamily="Inter,sans-serif">
                     {d.getUTCDate()}/{d.getUTCMonth()+1}
                   </text>
                 );
               })}
             </svg>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {symList.length > 0 && (
         <div style={{ background:'#0c0f1a', border:'1px solid #111626', borderRadius:8, padding:20 }}>
