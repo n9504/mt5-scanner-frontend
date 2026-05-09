@@ -176,6 +176,79 @@ export default function Reports() {
             </div>
           )}
 
+          {/* Performance by Setup, Session, Market Condition */}
+          {(() => {
+            const SETUP_TAGS = ['FVG','OB','BOS','CHoCH','Support','Resistance','Trendline Touch','Trendline Break'];
+            const SESSION_TAGS = ['Asia','London','US','London/US Overlap'];
+            const MARKET_TAGS = ['Trending','Range','Breakout','Reversal','High Volatility','Low Volatility','News Driven'];
+
+            function tagStats(tagList: string[]) {
+              return tagList.map(tag => {
+                const tagged = trades.filter((t:any) => (t.tags||[]).includes(tag));
+                const wins   = tagged.filter((t:any) => (t.execution_outcome||'').startsWith('WIN')).length;
+                const pnl    = tagged.reduce((s:number,t:any) => s+parseFloat(t.net_pnl||0),0);
+                const wr     = tagged.length > 0 ? Math.round(wins/tagged.length*100) : 0;
+                const avgPnl = tagged.length > 0 ? pnl/tagged.length : 0;
+                const conf   = tagged.length >= 10 ? 'High' : tagged.length >= 5 ? 'Medium' : 'Low';
+                return { tag, total:tagged.length, wins, wr, pnl:parseFloat(pnl.toFixed(2)), avgPnl:parseFloat(avgPnl.toFixed(2)), conf };
+              }).filter(s => s.total > 0).sort((a,b) => b.wr - a.wr);
+            }
+
+            function TagTable({ title, data, color }: any) {
+              if (!data.length) return null;
+              return (
+                <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30', borderRadius:8, padding:20, marginBottom:16 }}>
+                  <div style={{ fontSize:11, color:'#556080', textTransform:'uppercase' as const,
+                    letterSpacing:'.08em', fontWeight:700, marginBottom:14 }}>{title}</div>
+                  <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                    <thead>
+                      <tr>{['Tag','Trades','Win Rate','Avg P&L','Net P&L','Confidence'].map(h=>(
+                        <th key={h} style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
+                          letterSpacing:'.06em', padding:'6px 10px',
+                          textAlign: h==='Tag'?'left' as const:'right' as const,
+                          borderBottom:'1px solid #111626' }}>{h}</th>
+                      ))}</tr>
+                    </thead>
+                    <tbody>
+                      {data.map((d:any,i:number) => (
+                        <tr key={i} style={{ borderBottom:'1px solid #0c0f1a' }}>
+                          <td style={{ padding:'8px 10px', fontSize:12, fontWeight:600, color:'#E8ECF4' }}>{d.tag}</td>
+                          <td style={{ padding:'8px 10px', fontSize:11, color:'#556080', textAlign:'right' as const }}>{d.total}</td>
+                          <td style={{ padding:'8px 10px', fontSize:12, fontWeight:700,
+                            color:d.wr>=55?'#00C97A':d.wr>=40?'#F0A500':'#f04060',
+                            textAlign:'right' as const }}>{d.wr}%</td>
+                          <td style={{ padding:'8px 10px', fontSize:11,
+                            color:d.avgPnl>=0?'#00C97A':'#f04060', textAlign:'right' as const }}>
+                            {d.avgPnl>=0?'+$':'-$'}{Math.abs(d.avgPnl).toFixed(2)}
+                          </td>
+                          <td style={{ padding:'8px 10px', fontSize:11,
+                            color:d.pnl>=0?'#00C97A':'#f04060', textAlign:'right' as const }}>
+                            {d.pnl>=0?'+$':'-$'}{Math.abs(d.pnl).toFixed(2)}
+                          </td>
+                          <td style={{ padding:'8px 10px', textAlign:'right' as const }}>
+                            <span style={{ fontSize:9, padding:'2px 6px', borderRadius:3, fontWeight:700,
+                              color:d.conf==='High'?'#00C97A':d.conf==='Medium'?'#F0A500':'#556080',
+                              background:d.conf==='High'?'rgba(0,201,122,.1)':d.conf==='Medium'?'rgba(240,160,0,.1)':'rgba(85,96,128,.1)' }}>
+                              {d.conf} ({d.total}t)
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            }
+
+            return (
+              <>
+                <TagTable title="Performance by Setup" data={tagStats(SETUP_TAGS)} color="#4090f0" />
+                <TagTable title="Performance by Session" data={tagStats(SESSION_TAGS)} color="#9060f0" />
+                <TagTable title="Performance by Market Condition" data={tagStats(MARKET_TAGS)} color="#F0A500" />
+              </>
+            );
+          })()}
+
           {/* Behaviour tag performance */}
           {tagList.filter((t:any) => ['Calm','Fear','Greed','Disciplined','Panic','Strategic','Impatient','Revenge'].includes(t.tag)).length > 0 && (
             <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30', borderRadius:8, padding:20 }}>

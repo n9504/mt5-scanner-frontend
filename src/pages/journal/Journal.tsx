@@ -180,7 +180,9 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
         </td>
         <td style={{ padding:'12px 16px' }}>
           <div style={{ fontWeight:700, color:'#E8ECF4', fontSize:13 }}>{trade.symbol}</div>
-          <div style={{ fontSize:10, color:'#556080', marginTop:2 }}>{trade.scanner}</div>
+          <div style={{ fontSize:10, color:'#556080', marginTop:2 }}>
+            {trade.scanner === 'S1' || trade.scanner === 'S2' ? 'Algo' : 'Manual'}
+          </div>
         </td>
         <td style={{ padding:'12px 16px' }}>
           <span style={{
@@ -638,15 +640,15 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
 export default function Journal() {
   const [trades,        setTrades]        = useState<any[]>([]);
   const [loading,       setLoading]       = useState(true);
-  const [period,        setPeriod]        = useState('week');
   const [filterSymbol,  setFilterSymbol]  = useState('');
-  const [filterScanner, setFilterScanner] = useState('all');
   const [filterTag,     setFilterTag]     = useState('');
   const [filterResult,  setFilterResult]  = useState('all');
-  const [filterDate,    setFilterDate]    = useState('');
+  const defaultFrom = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
+  const [filterFrom,    setFilterFrom]    = useState(defaultFrom);
+  const [filterTo,      setFilterTo]      = useState('');
 
   const load = async (force=false) => {
-    const cacheKey = `journal_trades_${period}`;
+    const cacheKey = `journal_trades_all`;
     // Use cache for speed unless forced
     if (!force) {
       const cached = sessionStorage.getItem(cacheKey);
@@ -668,7 +670,7 @@ export default function Journal() {
   const loadFresh = async (cacheKey: string) => {
     try {
       const [closedR, openR] = await Promise.all([
-        getTrades({ status:'CLOSED', period }).catch(() => ({ data:[] })),
+        getTrades({ status:'CLOSED', period:'all' }).catch(() => ({ data:[] })),
         getTrades({ status:'OPEN' }).catch(() => ({ data:[] })),
       ]);
       const all = [...(openR.data||[]), ...(closedR.data||[])];
@@ -677,18 +679,16 @@ export default function Journal() {
     } catch(e) {}
   };
 
-  useEffect(() => { setLoading(true); load(); }, [period]); // eslint-disable-line
+  useEffect(() => { setLoading(true); load(); }, []); // eslint-disable-line
 
   const filtered = trades.filter(t => {
     if (filterSymbol && t.symbol !== filterSymbol) return false;
-    if (filterScanner !== 'all' && t.scanner !== filterScanner) return false;
     if (filterTag && !(t.tags||[]).includes(filterTag)) return false;
     if (filterResult === 'win'  && !(t.execution_outcome||'').startsWith('WIN'))  return false;
     if (filterResult === 'loss' && !(t.execution_outcome||'').startsWith('LOSS')) return false;
-    if (filterDate) {
-      const closeDate = t.close_time ? new Date(t.close_time).toISOString().slice(0,10) : '';
-      if (closeDate !== filterDate) return false;
-    }
+    const tradeDate = (t.close_time || t.open_time || '').slice(0,10);
+    if (filterFrom && tradeDate < filterFrom) return false;
+    if (filterTo   && tradeDate > filterTo)   return false;
     return true;
   });
 
@@ -722,15 +722,23 @@ export default function Journal() {
 
       {/* Filters */}
       <div style={{ display:'flex', alignItems:'center', gap:10,
-        marginBottom:16, flexWrap:'wrap' }}>
-        <select value={period} onChange={e=>setPeriod(e.target.value)} style={{
-          padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
-          borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit' }}>
-          <option value="today">Today</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-          <option value="all">All Time</option>
-        </select>
+        marginBottom:16, flexWrap:'wrap' as const }}>
+        {/* From date */}
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ fontSize:11, color:'#556080' }}>From</span>
+          <input type="date" value={filterFrom} onChange={e=>setFilterFrom(e.target.value)}
+            style={{ padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
+              borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit',
+              colorScheme:'dark' as any }}/>
+        </div>
+        {/* To date */}
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ fontSize:11, color:'#556080' }}>To</span>
+          <input type="date" value={filterTo} onChange={e=>setFilterTo(e.target.value)}
+            style={{ padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
+              borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit',
+              colorScheme:'dark' as any }}/>
+        </div>
         <select value={filterResult} onChange={e=>setFilterResult(e.target.value)} style={{
           padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
           borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit' }}>
@@ -744,14 +752,6 @@ export default function Journal() {
           <option value="">All Symbols</option>
           {symbols.map(s=><option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={filterScanner} onChange={e=>setFilterScanner(e.target.value)} style={{
-          padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
-          borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit' }}>
-          <option value="all">All Scanners</option>
-          <option value="S1">S1</option>
-          <option value="S2">S2</option>
-          <option value="MANUAL">Manual</option>
-        </select>
         {allTags.length > 0 && (
           <select value={filterTag} onChange={e=>setFilterTag(e.target.value)} style={{
             padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
@@ -760,13 +760,11 @@ export default function Journal() {
             {allTags.map(t=><option key={t} value={t}>{t}</option>)}
           </select>
         )}
-        <input type="date" value={filterDate} onChange={e=>setFilterDate(e.target.value)}
-          style={{ padding:'7px 12px', background:'#0c0f1a', border:'1px solid #252d42',
-            borderRadius:6, color:'#E8ECF4', fontSize:11, fontFamily:'inherit',
-            colorScheme:'dark' }}/>
-        {(filterSymbol||filterTag||filterScanner!=='all'||filterResult!=='all'||filterDate) && (
-          <button onClick={()=>{setFilterSymbol('');setFilterTag('');
-            setFilterScanner('all');setFilterResult('all');setFilterDate('');}} style={{
+        {(filterSymbol||filterTag||filterResult!=='all') && (
+          <button onClick={()=>{
+            setFilterSymbol('');setFilterTag('');setFilterResult('all');
+            setFilterFrom(defaultFrom);setFilterTo('');
+          }} style={{
             padding:'7px 12px', background:'transparent',
             border:'1px solid #252d42', borderRadius:6,
             color:'#556080', fontSize:11, cursor:'pointer' }}>

@@ -44,7 +44,7 @@ function Field({ label, value, onChange, suffix, placeholder }: any) {
 
 function AccountConfig({ account, onSaved }: { account: any; onSaved: () => void }) {
   const [type,    setType]    = useState(account.account_type || 'personal');
-  const [saving,  setSaving]  = useState(false);
+  const [saving, setSaving] = useState(false);
   const [form,    setForm]    = useState({
     timezone:                account.timezone || 'UTC',
     daily_profit_target:     account.daily_profit_target || '',
@@ -146,10 +146,11 @@ function AccountConfig({ account, onSaved }: { account: any; onSaved: () => void
 
 export default function Settings() {
   const { tenant, logout } = useAuth();
-  const [accounts,   setAccounts]   = useState<any[]>([]);
-  const [apiKey,     setApiKey]     = useState('');
-  const [activeTab,  setActiveTab]  = useState<'profile'|'accounts'|'subscription'>('profile');
-  const [editingAcc, setEditingAcc] = useState<string|null>(null);
+  const [accounts,       setAccounts]       = useState<any[]>([]);
+  const [apiKey,         setApiKey]         = useState('');
+  const [activeTab,      setActiveTab]      = useState<'profile'|'accounts'|'subscription'>('profile');
+  const [editingAcc,     setEditingAcc]     = useState<string|null>(null);
+  const [tradingMethod,  setTradingMethod]  = useState('manual');
 
   const loadData = () => {
     getAccounts().then(r => setAccounts(r.data || [])).catch(() => {});
@@ -232,6 +233,51 @@ export default function Settings() {
             border:'1px solid rgba(240,64,96,0.3)', borderRadius:6,
             color:'#f04060', fontSize:12, cursor:'pointer', alignSelf:'flex-start' as const,
           }}>Sign Out</button>
+
+          {/* Trading Method */}
+          <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30', borderRadius:8, padding:'16px 20px' }}>
+            <div style={{ fontSize:11, color:'#556080', textTransform:'uppercase' as const,
+              letterSpacing:'.08em', marginBottom:12, fontWeight:700 }}>Trading Method</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
+                <input type="radio" name="trading_method" value="manual"
+                  checked={tradingMethod==='manual'}
+                  onChange={()=>setTradingMethod('manual')}
+                  style={{ accentColor:'#00C97A' }}/>
+                <span style={{ fontSize:12, color:'#E8ECF4' }}>Manual only</span>
+              </label>
+              <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
+                <input type="radio" name="trading_method" value="algo"
+                  checked={tradingMethod==='algo'}
+                  onChange={()=>setTradingMethod('algo')}
+                  style={{ accentColor:'#00C97A' }}/>
+                <span style={{ fontSize:12, color:'#E8ECF4' }}>Algo assisted</span>
+              </label>
+              {tradingMethod === 'algo' && (
+                <div style={{ marginLeft:24, padding:'10px 14px', background:'#111626',
+                  borderRadius:6 }}>
+                  <div style={{ fontSize:11, color:'#556080', marginBottom:8 }}>
+                    EA Magic Numbers (identifies your algo trades)
+                  </div>
+                  <div style={{ display:'flex', gap:8, flexWrap:'wrap' as const }}>
+                    {['S1 (default)','S2 (default)'].map(opt => (
+                      <label key={opt} style={{ display:'flex', alignItems:'center',
+                        gap:6, cursor:'pointer' }}>
+                        <input type="checkbox" defaultChecked style={{ accentColor:'#9060f0' }}/>
+                        <span style={{ fontSize:11, color:'#8899b4' }}>{opt}</span>
+                      </label>
+                    ))}
+                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                      <span style={{ fontSize:11, color:'#556080' }}>Custom:</span>
+                      <input placeholder="magic number" style={{
+                        padding:'4px 8px', background:'#0c0f1a', border:'1px solid #252d42',
+                        borderRadius:4, color:'#E8ECF4', fontSize:11, width:100, fontFamily:'inherit' }}/>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           <div style={{ background:'rgba(240,64,96,0.03)', border:'1px solid rgba(240,64,96,0.1)',
             borderRadius:8, padding:'16px 20px', marginTop:8 }}>
