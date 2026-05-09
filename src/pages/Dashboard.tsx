@@ -9,6 +9,7 @@ import AccountSetup from './setup/AccountSetup';
 import Bias from './bias/Bias';
 import Reports from './reports/Reports';
 import CalendarPage from './calendar/CalendarPage';
+import PlanPage from './plan/PlanPage';
 import { useAuth } from '../context/AuthContext';
 
 function fmt(n: number) { const abs = Math.abs(n).toFixed(2); return (n >= 0 ? '+$' : '-$') + abs; }
@@ -508,6 +509,7 @@ export default function Dashboard() {
       case 'calendar':    return <CalendarPage />;
       case 'performance': return <PerformanceTab trades={allTrades} />;
       case 'reports':     return <Reports />;
+      case 'plan':       return <PlanPage />;
       case 'bias':        return <Bias />;
       case 'insights':    return isPro ? <Insights /> : <div style={{ textAlign:'center', padding:60, color:'#556080' }}>Available on Pro plan</div>;
       case 'signals':     return isElite ? <SignalsTab signals={signals} onRefresh={loadData} /> : <div style={{ textAlign:'center', padding:60, color:'#556080' }}>Available on Elite plan</div>;

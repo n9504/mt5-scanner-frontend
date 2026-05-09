@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'calendar',    icon: '📅', label: 'Calendar'   },
   { key: 'performance', icon: '📈', label: 'Performance'},
   { key: 'reports',     icon: '📊', label: 'Reports'    },
+  { key: 'plan',        icon: '🎯', label: 'Plan & Edge' },
   { key: 'bias',        icon: '🧭', label: 'Bias'       },
   { key: 'insights',    icon: '🧠', label: 'Insights',  tier: 'pro' },
   { key: 'signals',     icon: '⚡', label: 'Signals',   tier: 'elite' },
