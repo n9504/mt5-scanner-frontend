@@ -232,6 +232,29 @@ export default function Settings() {
             border:'1px solid rgba(240,64,96,0.3)', borderRadius:6,
             color:'#f04060', fontSize:12, cursor:'pointer', alignSelf:'flex-start' as const,
           }}>Sign Out</button>
+
+          <div style={{ background:'rgba(240,64,96,0.03)', border:'1px solid rgba(240,64,96,0.1)',
+            borderRadius:8, padding:'16px 20px', marginTop:8 }}>
+            <div style={{ fontSize:11, color:'#f04060', textTransform:'uppercase' as const,
+              letterSpacing:'.08em', marginBottom:8, fontWeight:700 }}>Danger Zone</div>
+            <p style={{ fontSize:12, color:'#556080', marginBottom:12, lineHeight:1.6 }}>
+              Wipe all synced trades and restart from scratch. Use this if trades are out of sync.
+              After wiping, restart your MT5 EA to re-sync all history.
+            </p>
+            <button onClick={async () => {
+              if (!window.confirm('Delete ALL trades? This cannot be undone. Restart MT5 EA after to re-sync.')) return;
+              try {
+                await api.delete('/api/v1/trades/all');
+                alert('All trades deleted. Please restart MT5 EA now.');
+              } catch(e) {
+                alert('Failed — contact support');
+              }
+            }} style={{
+              padding:'8px 18px', background:'transparent',
+              border:'1px solid rgba(240,64,96,0.4)', borderRadius:6,
+              color:'#f04060', fontSize:11, cursor:'pointer', fontWeight:700,
+            }}>⚠ Wipe All Trades</button>
+          </div>
         </div>
       )}
 
