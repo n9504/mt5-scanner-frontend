@@ -6,10 +6,10 @@ const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Satur
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; color: string; bg: string }> = {
-    PASS:       { label: '✓ Pass',         color: '#00C97A', bg: 'rgba(0,201,122,.12)' },
+    EXCELLENT:  { label: '★ Excellent',    color: '#00C97A', bg: 'rgba(0,201,122,.15)' },
+    PASS:       { label: '✓ Pass',         color: '#00C97A', bg: 'rgba(0,201,122,.10)' },
     RISKY:      { label: '⚠ Risky',        color: '#F0A500', bg: 'rgba(240,160,0,.12)' },
     FAIL:       { label: '✗ Fail',         color: '#f04060', bg: 'rgba(240,64,96,.12)' },
-    NO_TRADES:  { label: '— No trades',    color: '#556080', bg: 'rgba(85,96,128,.10)' },
     FUTURE:     { label: '— Upcoming',     color: '#3a4560', bg: 'transparent' },
   };
   const s = map[status] || { label: status, color: '#556080', bg: 'transparent' };
@@ -114,9 +114,7 @@ export default function PlanPage() {
   const bottomSymbols = symStats.filter(s => s.wr < 40).slice(0,2);
 
   const fmtPnl  = (v: number) => v >= 0 ? `+$${v.toFixed(2)}` : `-$${Math.abs(v).toFixed(2)}`;
-  const fmtN    = (v: number) => `${v}`;
   const fmtPct  = (v: number) => `${v}%`;
-  const fmtLoss = (v: number) => v < 0 ? `-$${Math.abs(v).toFixed(2)}` : `-$${Math.abs(v).toFixed(2)}`;
 
   const generatePlan = async () => {
     setGenerating(true);
@@ -166,7 +164,7 @@ export default function PlanPage() {
                 <tr style={{ background:'#070b14' }}>
                   <td colSpan={4} style={{ padding:'6px 16px', fontSize:9, color:'#3a4560',
                     fontStyle:'italic' }}>
-                    Pass = profitable AND within trade count. Both must pass.
+                    Pass = P&L within boundaries (max loss to target) AND trades ≤ planned. 0 trades = Excellent.
                   </td>
                 </tr>
                 <tr style={{ background:'#070b14' }}>
@@ -179,12 +177,40 @@ export default function PlanPage() {
                 </tr>
               </thead>
               <tbody>
-                <PlanRow label="Trades"       planned={todayPlan.planned_trades}   actual={todayPlan.actual_trades}   format={fmtN} />
-                {todayPlan.planned_profit > 0 && (
-                  <PlanRow label="Profit Target" planned={todayPlan.planned_profit} actual={todayPlan.actual_profit} format={fmtPnl} />
-                )}
-                {todayPlan.planned_max_loss > 0 && (
-                  <PlanRow label="Max Loss" planned={-todayPlan.planned_max_loss} actual={Math.min(0,todayPlan.actual_profit)} format={fmtLoss} />
+                <tr style={{ borderBottom:'1px solid #111626' }}>
+                    <td style={{ padding:'12px 16px', fontSize:12, color:'#8899b4', fontWeight:500 }}>Trades</td>
+                    <td style={{ padding:'12px 16px', fontSize:12, color:'#556080', textAlign:'right' as const }}>
+                      ≤{todayPlan.planned_trades}
+                    </td>
+                    <td style={{ padding:'12px 16px', fontSize:13, fontWeight:700,
+                      color: todayPlan.actual_trades === 0 ? '#00C97A'
+                           : todayPlan.actual_trades <= todayPlan.planned_trades ? '#00C97A' : '#f04060',
+                      textAlign:'right' as const }}>
+                      {todayPlan.actual_trades === 0 ? '0 — no trades' : todayPlan.actual_trades}
+                    </td>
+                    <td style={{ padding:'12px 16px', textAlign:'center' as const, fontSize:14 }}>
+                      {todayPlan.actual_trades <= todayPlan.planned_trades ? '✓' : '✗'}
+                    </td>
+                  </tr>
+                {/* Single P&L row showing actual vs boundaries */}
+                {(todayPlan.planned_profit > 0 || todayPlan.planned_max_loss > 0) && (
+                  <tr style={{ borderBottom:'1px solid #111626' }}>
+                    <td style={{ padding:'12px 16px', fontSize:12, color:'#8899b4', fontWeight:500 }}>P&L</td>
+                    <td style={{ padding:'12px 16px', fontSize:11, color:'#556080', textAlign:'right' as const }}>
+                      {todayPlan.planned_max_loss > 0 && <span>-${todayPlan.planned_max_loss} to </span>}
+                      {todayPlan.planned_profit > 0 ? `+$${todayPlan.planned_profit}` : 'any profit'}
+                    </td>
+                    <td style={{ padding:'12px 16px', fontSize:13, fontWeight:700,
+                      color: todayPlan.actual_profit >= (todayPlan.planned_profit||0) ? '#00C97A'
+                           : todayPlan.actual_profit >= -(todayPlan.planned_max_loss||999999) ? '#F0A500'
+                           : '#f04060',
+                      textAlign:'right' as const }}>
+                      {fmtPnl(todayPlan.actual_profit)}
+                    </td>
+                    <td style={{ padding:'12px 16px', textAlign:'center' as const, fontSize:14 }}>
+                      {todayPlan.actual_profit >= -(todayPlan.planned_max_loss||999999) ? '✓' : '✗'}
+                    </td>
+                  </tr>
                 )}
                 <PlanRow label="Win Rate"     planned={todayPlan.planned_wr}       actual={todayPlan.actual_wr}        format={fmtPct} />
                 <tr style={{ background:'#070b14' }}>
@@ -211,6 +237,7 @@ export default function PlanPage() {
                 This Week
               </div>
               <div style={{ display:'flex', gap:12, fontSize:11 }}>
+                {weeklyPlan.excellent_days > 0 && <span style={{ color:'#00C97A' }}>★ {weeklyPlan.excellent_days} excellent</span>}
                 <span style={{ color:'#00C97A' }}>✓ {weeklyPlan.pass_days} pass</span>
                 {weeklyPlan.risky_days > 0 && <span style={{ color:'#F0A500' }}>⚠ {weeklyPlan.risky_days} risky</span>}
                 <span style={{ color:'#f04060' }}>✗ {weeklyPlan.fail_days} fail</span>
@@ -243,8 +270,8 @@ export default function PlanPage() {
                       </div>
                     </td>
                     <td style={{ padding:'12px 16px', textAlign:'right' as const, fontSize:12,
-                      color: d.actual_trades > d.planned_trades ? '#f04060' : '#E8ECF4' }}>
-                      {d.status !== 'FUTURE' ? `${d.actual_trades}/${d.planned_trades}` : '—'}
+                      color: d.actual_trades === 0 ? '#00C97A' : d.actual_trades > d.planned_trades ? '#f04060' : '#00C97A' }}>
+                      {d.status !== 'FUTURE' ? (d.actual_trades === 0 ? '0 ★' : `${d.actual_trades}/${d.planned_trades}`) : '—'}
                     </td>
                     <td style={{ padding:'12px 16px', textAlign:'right' as const, fontSize:12,
                       fontWeight:700,
