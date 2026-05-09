@@ -524,34 +524,34 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                   ) : (
                     <div>
                       {/* Entry charts */}
-                      {(trade.screenshot_entry || trade.screenshot_h1_entry) && (
+                      {(screenshots?.screenshot_entry || screenshots?.screenshot_h1_entry) && (
                         <div style={{ marginBottom:20 }}>
                           <div style={{ fontSize:11, color:'#00C97A', fontWeight:700,
                             textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>
                             Entry
                           </div>
                           <div style={{ display:'grid',
-                            gridTemplateColumns: trade.screenshot_entry && trade.screenshot_h1_entry
+                            gridTemplateColumns: screenshots?.screenshot_entry && screenshots?.screenshot_h1_entry
                               ? '1fr 1fr' : '1fr', gap:12 }}>
-                            {trade.screenshot_entry && (
+                            {screenshots?.screenshot_entry && (
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>M15</div>
                                 <img
-                                  src={(screenshots?.screenshot_entry || trade.screenshot_entry || '').startsWith('data:')
-                                    ? (screenshots?.screenshot_entry || trade.screenshot_entry)
-                                    : `data:image/png;base64,${screenshots?.screenshot_entry || trade.screenshot_entry}`}
+                                  src={screenshots.screenshot_entry.startsWith('data:')
+                                    ? screenshots.screenshot_entry
+                                    : `data:image/png;base64,${screenshots.screenshot_entry}`}
                                   alt="M15 Entry"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
                               </div>
                             )}
-                            {trade.screenshot_h1_entry && (
+                            {screenshots?.screenshot_h1_entry && (
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>H1</div>
                                 <img
-                                  src={(screenshots?.screenshot_h1_entry || trade.screenshot_h1_entry || '').startsWith('data:')
-                                    ? (screenshots?.screenshot_h1_entry || trade.screenshot_h1_entry)
-                                    : `data:image/png;base64,${screenshots?.screenshot_h1_entry || trade.screenshot_h1_entry}`}
+                                  src={screenshots.screenshot_h1_entry.startsWith('data:')
+                                    ? screenshots.screenshot_h1_entry
+                                    : `data:image/png;base64,${screenshots.screenshot_h1_entry}`}
                                   alt="H1 Entry"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
@@ -561,34 +561,34 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                         </div>
                       )}
                       {/* Exit charts */}
-                      {(trade.screenshot_exit || trade.screenshot_h1_exit) && (
+                      {(screenshots?.screenshot_exit || screenshots?.screenshot_h1_exit) && (
                         <div>
                           <div style={{ fontSize:11, color:'#f04060', fontWeight:700,
                             textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>
                             Exit
                           </div>
                           <div style={{ display:'grid',
-                            gridTemplateColumns: trade.screenshot_exit && trade.screenshot_h1_exit
+                            gridTemplateColumns: screenshots?.screenshot_exit && screenshots?.screenshot_h1_exit
                               ? '1fr 1fr' : '1fr', gap:12 }}>
-                            {trade.screenshot_exit && (
+                            {screenshots?.screenshot_exit && (
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>M15</div>
                                 <img
-                                  src={(screenshots?.screenshot_exit || trade.screenshot_exit || '').startsWith('data:')
-                                    ? (screenshots?.screenshot_exit || trade.screenshot_exit)
-                                    : `data:image/png;base64,${screenshots?.screenshot_exit || trade.screenshot_exit}`}
+                                  src={screenshots.screenshot_exit.startsWith('data:')
+                                    ? screenshots.screenshot_exit
+                                    : `data:image/png;base64,${screenshots.screenshot_exit}`}
                                   alt="M15 Exit"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
                               </div>
                             )}
-                            {trade.screenshot_h1_exit && (
+                            {screenshots?.screenshot_h1_exit && (
                               <div>
                                 <div style={{ fontSize:9, color:'#556080', marginBottom:6 }}>H1</div>
                                 <img
-                                  src={(screenshots?.screenshot_h1_exit || trade.screenshot_h1_exit || '').startsWith('data:')
-                                    ? (screenshots?.screenshot_h1_exit || trade.screenshot_h1_exit)
-                                    : `data:image/png;base64,${screenshots?.screenshot_h1_exit || trade.screenshot_h1_exit}`}
+                                  src={screenshots.screenshot_h1_exit.startsWith('data:')
+                                    ? screenshots.screenshot_h1_exit
+                                    : `data:image/png;base64,${screenshots.screenshot_h1_exit}`}
                                   alt="H1 Exit"
                                   style={{ width:'100%', borderRadius:6,
                                     border:'1px solid #1a1f30', display:'block' }}/>
