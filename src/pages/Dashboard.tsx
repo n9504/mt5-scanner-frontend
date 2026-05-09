@@ -463,19 +463,20 @@ export default function Dashboard() {
   const isBeta       = tenant?.is_beta;
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#070b14',
-      fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color:'#E8ECF4' }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'100vh', background:'#070b14',
+      fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color:'#E8ECF4',
+      overflow:'hidden' }}>
 
       {/* Beta banner */}
       {isBeta && betaDaysLeft !== null && betaDaysLeft !== undefined && (
         <div style={{ background:'rgba(0,201,122,.08)', borderBottom:'1px solid rgba(0,201,122,.2)',
-          padding:'8px 24px', display:'flex', justifyContent:'space-between',
-          alignItems:'center', flexShrink:0 }}>
+          padding:'6px 24px', display:'flex', justifyContent:'space-between',
+          alignItems:'center', flexShrink:0, zIndex:10 }}>
           <span style={{ fontSize:11, color:'#00C97A' }}>
-            🎉 <strong>Beta Access</strong> — Full Elite features free for {betaDaysLeft} more day{betaDaysLeft !== 1 ? 's' : ''}
+            🎉 <strong>Beta</strong> — {betaDaysLeft} day{betaDaysLeft !== 1 ? 's' : ''} remaining · AI analysis up to 5 trades/day
           </span>
           <span style={{ fontSize:10, color:'#556080' }}>
-            No credit card required · AI analysis runs automatically each Sunday
+            No credit card required · Unlimited journalling
           </span>
         </div>
       )}
