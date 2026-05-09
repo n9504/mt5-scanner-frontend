@@ -50,7 +50,20 @@ const AnimatedChart = () => {
 };
 
 // ── TIER CARD ──
-const TierCard = ({ tier, onSelect }: { tier: any, onSelect: () => void }) => (
+const TierCard = ({ tier, onSelect }: { tier: any, onSelect: () => void }) => {
+  if (tier.locked) return (
+    <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
+      borderRadius:16, padding:'32px 28px', opacity:0.45,
+      textAlign:'center' as const, display:'flex', flexDirection:'column' as const,
+      alignItems:'center', justifyContent:'center', minHeight:200 }}>
+      <div style={{ fontSize:28, marginBottom:12 }}>🔒</div>
+      <div style={{ fontSize:14, fontWeight:700, color:'#E8ECF4', marginBottom:6 }}>
+        {tier.name}
+      </div>
+      <div style={{ fontSize:11, color:'#556080' }}>{tier.desc}</div>
+    </div>
+  );
+  return (
   <div style={{
     background: tier.featured ? 'linear-gradient(135deg, #0a1628, #0d2040)' : '#0c0f1a',
     border: `1px solid ${tier.featured ? '#00C97A' : '#1a1f30'}`,
@@ -118,8 +131,7 @@ const TierCard = ({ tier, onSelect }: { tier: any, onSelect: () => void }) => (
     </button>
   </div>
 );
-
-// ── FEATURE BLOCK ──
+};
 const Feature = ({ icon, title, desc }: any) => (
   <div style={{
     padding: '28px 24px', borderRadius: 12,
@@ -159,90 +171,53 @@ export default function Landing() {
 
   const tiers = [
     {
+      name: 'Beta',
+      price: 0,
+      desc: '21 days free — no credit card required',
+      cta: 'Join Beta Free →',
+      featured: true,
+      badge: '🎉 Limited Time',
+      features: [
+        'Unlimited trades — auto-synced via MT5 EA',
+        'Unlimited manual setup tagging',
+        'Unlimited auto session tagging',
+        'Unlimited auto behaviour tagging',
+        'Screenshots always stored',
+        'AI structural analysis — up to 5 trades/day',
+        'Trading DNA after 50 trades',
+        'Weekly AI behavioural insights',
+        'Dashboard, calendar, plan & performance',
+        '1 account',
+      ],
+    },
+    {
       name: 'Journal',
       price: 9,
-      desc: 'Unlimited journalling — manual setup tagging',
-      cta: 'Start Journalling',
+      desc: 'Unlimited journalling with weekly AI insights',
+      cta: 'Start at $9/mo',
       featured: false,
       features: [
         'Unlimited trades — auto-synced via MT5 EA',
-        'Unlimited manual setup tagging (FVG, OB, BOS etc)',
-        'Unlimited auto session tagging (Asia/London/US)',
-        'Unlimited auto behaviour tagging (Calm/Fear/Greed etc)',
-        'Full journal — screenshots always stored',
+        'Unlimited manual setup tagging',
+        'Unlimited auto session tagging',
+        'Unlimited auto behaviour tagging',
+        'Screenshots always stored',
         'Dashboard, calendar, performance reports',
         'Weekly AI behavioural insights',
         'Plan & Edge tracker · 1 account',
       ],
       excluded: [
-        'AI setup classification',
-        'AI entry scoring',
         'AI structural analysis',
       ],
     },
     {
-      name: 'Starter',
-      price: 19,
-      desc: 'AI setup tagging for up to 10 trades/day',
-      cta: 'Start Starter',
+      name: 'More plans',
+      price: null,
+      desc: 'Higher AI analysis limits — coming soon',
+      cta: null,
       featured: false,
-      features: [
-        'Everything in Journal',
-        'AI setup classification — up to 10 trades/day',
-        'Unlimited manual setup tagging beyond limit',
-        'Unlimited auto session + behaviour tagging',
-        'AI entry score (1-10) + structural observations',
-        'Trendline detection',
-        '1 account',
-      ],
-    },
-    {
-      name: 'Growth',
-      price: 29,
-      desc: 'AI setup tagging for up to 25 trades/day',
-      cta: 'Start Growth',
-      featured: true,
-      features: [
-        'Everything in Starter',
-        'AI setup classification — up to 25 trades/day',
-        'Unlimited manual setup tagging beyond limit',
-        'Unlimited auto session + behaviour tagging',
-        'Trading DNA after 50 trades',
-        'Behaviour contradiction detection',
-        '2 accounts',
-      ],
-    },
-    {
-      name: 'Pro',
-      price: 49,
-      desc: 'AI setup tagging for up to 50 trades/day',
-      cta: 'Start Pro',
-      featured: false,
-      features: [
-        'Everything in Growth',
-        'AI setup classification — up to 50 trades/day',
-        'Unlimited manual setup tagging beyond limit',
-        'Unlimited auto session + behaviour tagging',
-        'Trader personality profile',
-        'Full behavioural scorecard',
-        '3 accounts',
-      ],
-    },
-    {
-      name: 'Elite',
-      price: 79,
-      desc: 'AI setup tagging for up to 100 trades/day',
-      cta: 'Start Elite',
-      featured: false,
-      features: [
-        'Everything in Pro',
-        'AI setup classification — up to 100 trades/day',
-        'Unlimited manual setup tagging beyond limit',
-        'Unlimited auto session + behaviour tagging',
-        'Weekly AI narrative report',
-        'Expectancy metrics + advanced analytics',
-        '5 accounts',
-      ],
+      locked: true,
+      features: [],
     },
   ];
 
@@ -449,7 +424,7 @@ export default function Landing() {
       }}>
         <div style={{
           maxWidth: 900, margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 40,
+          display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 40,
         }}>
           <Stat value="50+" label="Trades to find your edge" />
           <Stat value="$0.30" label="AI analysis per trade" />
@@ -541,7 +516,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 16, alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, alignItems: 'start' }}>
             {tiers.map((tier, i) => (
               <TierCard key={i} tier={tier} onSelect={() => navigate('/register')} />
             ))}
