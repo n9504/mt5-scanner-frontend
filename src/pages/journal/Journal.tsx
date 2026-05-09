@@ -396,9 +396,20 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                         trade.status === 'OPEN' ? (
                           <div style={{ background:'rgba(64,144,240,.05)', border:'1px solid rgba(64,144,240,.15)',
                             borderRadius:6, padding:'12px 14px', marginBottom:10, fontSize:12, color:'#4090f0' }}>
-                            ⏳ Entry analysis running... Screenshots are being processed by AI.
+                            ⏳ AI analysis processing... Check back shortly.
                           </div>
-                        ) : null
+                        ) : (() => {
+                          // Check if analysis was skipped
+                          let parsed: any = null;
+                          try { parsed = trade.entry_analysis ? JSON.parse(trade.entry_analysis) : null; } catch(e) {}
+                          if (parsed?.skipped) return (
+                            <div style={{ background:'rgba(85,96,128,.05)', border:'1px solid rgba(85,96,128,.15)',
+                              borderRadius:6, padding:'12px 14px', marginBottom:10, fontSize:11, color:'#556080' }}>
+                              📸 Screenshots saved · {parsed.reason}
+                            </div>
+                          );
+                          return null;
+                        })()
                       );
                     })()}
 

@@ -112,12 +112,18 @@ export default function Insights() {
               ))}
             </select>
           )}
-          {running && (
-            <span style={{ fontSize:11, color:'#9060f0', padding:'6px 12px',
-              background:'rgba(144,96,240,.08)', borderRadius:5 }}>
-              🧠 Analysing...
-            </span>
-          )}
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            {running ? (
+              <span style={{ fontSize:11, color:'#9060f0', padding:'6px 12px',
+                background:'rgba(144,96,240,.08)', borderRadius:5 }}>
+                🧠 Analysing...
+              </span>
+            ) : (
+              <span style={{ fontSize:10, color:'#3a4560' }}>
+                Auto-runs every Sunday
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

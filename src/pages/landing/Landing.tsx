@@ -159,73 +159,83 @@ export default function Landing() {
 
   const tiers = [
     {
-      name: 'Free',
-      price: 0,
-      desc: 'Start journalling your trades today',
-      cta: 'Start Free',
+      name: 'Journal',
+      price: 9,
+      desc: 'Unlimited journalling with weekly AI insights',
+      cta: 'Start Journalling',
       featured: false,
       features: [
-        'Up to 50 trades journal',
-        'Manual trade entry',
-        'Basic win/loss stats',
-        'Session performance',
-        'CSV export',
+        'Unlimited trades — automated via MT5 EA',
+        'Full journal — entry, exit, screenshots',
+        'Dashboard, calendar, performance reports',
+        'Weekly AI behavioural insights',
+        'Plan & Edge tracker',
+        '1 account',
       ],
       excluded: [
-        'EA auto-sync',
-        'AI chart analysis',
-        'Behaviour patterns',
+        'AI entry/exit analysis',
+        'Entry scoring',
+      ],
+    },
+    {
+      name: 'Starter',
+      price: 19,
+      desc: 'AI analysis for up to 10 trades per day',
+      cta: 'Start Starter',
+      featured: false,
+      features: [
+        'Everything in Journal',
+        'AI entry/exit analysis — up to 10 trades/day',
+        'Entry score + setup classification',
+        'Structural observations',
+        'Trendline detection',
+        'Weekly AI behavioural report',
+        '1 account',
+      ],
+    },
+    {
+      name: 'Growth',
+      price: 29,
+      desc: 'AI analysis for up to 25 trades per day',
+      cta: 'Start Growth',
+      featured: true,
+      features: [
+        'Everything in Starter',
+        'AI entry/exit analysis — up to 25 trades/day',
+        'Trading DNA after 50 trades',
+        'Behavioural contradiction detection',
+        'Behaviour drift detection',
+        '2 accounts',
       ],
     },
     {
       name: 'Pro',
-      price: 29,
-      desc: 'For serious traders who want their edge',
+      price: 49,
+      desc: 'AI analysis for up to 50 trades per day',
       cta: 'Start Pro',
-      featured: true,
+      featured: false,
       features: [
-        'Unlimited trades',
-        'EA auto-sync (MT4/MT5)',
-        'Edge report — best hours, pairs, sessions',
-        'Tag system & trade notes',
-        'Screenshot journal',
-        'Weekly performance review',
-        'Multi-account support',
-      ],
-      excluded: [
-        'AI chart analysis',
-        'Behaviour pattern AI',
+        'Everything in Growth',
+        'AI entry/exit analysis — up to 50 trades/day',
+        'Trader personality profile',
+        'Full behavioural scorecard',
+        'Priority support',
+        '3 accounts',
       ],
     },
     {
       name: 'Elite',
       price: 79,
-      desc: 'AI-powered deep analysis of your trading',
+      desc: 'Full AI analysis — up to 100 trades per day',
       cta: 'Start Elite',
       featured: false,
       features: [
         'Everything in Pro',
-        'AI chart analysis at entry & exit',
-        'Behaviour pattern detection',
-        'FOMO, revenge & emotional trade flags',
-        'After 50 trades: full edge report',
-        'Optional signal feed (toggle on/off)',
-        'Priority support',
-      ],
-    },
-    {
-      name: 'Prop',
-      price: 49,
-      desc: 'Built for prop firm traders & challengers',
-      cta: 'Start Prop',
-      featured: false,
-      features: [
-        'Everything in Pro',
-        'Daily loss limit tracker',
-        'Max drawdown alerts',
-        'Challenge pass/fail monitor',
-        'FTMO, MyFundedFX, 5ers rules',
-        'Multiple challenge accounts',
+        'AI entry/exit analysis — up to 100 trades/day',
+        'Weekly AI narrative report',
+        'Expectancy metrics',
+        'Advanced behavioural analytics',
+        '5 accounts',
       ],
     },
   ];
@@ -507,10 +517,25 @@ export default function Landing() {
             <div style={{ fontSize: 11, color: '#00C97A', textTransform: 'uppercase',
               letterSpacing: '.12em', marginBottom: 12 }}>Pricing</div>
             <h2 style={{ fontSize: 40, fontWeight: 700, fontFamily: 'Georgia, serif',
-              marginBottom: 16 }}>Simple, honest pricing</h2>
-            <p style={{ color: '#556080', fontSize: 14 }}>Start free. Upgrade when you're ready.</p>
+              marginBottom: 16 }}>Transparent pricing — unlimited journalling on every plan</h2>
+            <p style={{ color: '#556080', fontSize: 14 }}>Screenshots always stored. AI analysis scales with your plan. Cancel anytime.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, alignItems: 'center' }}>
+          {/* Beta callout */}
+          <div style={{ background:'rgba(0,201,122,.06)', border:'1px solid rgba(0,201,122,.2)',
+            borderRadius:10, padding:'20px 28px', marginBottom:32, textAlign:'center' as const }}>
+            <span style={{ fontSize:11, fontWeight:700, color:'#00C97A',
+              textTransform:'uppercase' as const, letterSpacing:'.1em' }}>
+              🎉 Beta Launch — Limited Time
+            </span>
+            <p style={{ fontSize:14, color:'#E8ECF4', margin:'8px 0 4px', fontWeight:600 }}>
+              Sign up now and get 21 days of Elite access — completely free
+            </p>
+            <p style={{ fontSize:12, color:'#556080', margin:0 }}>
+              No credit card · AI analysis up to 5 trades/day · Weekly insights · Unlimited journalling
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 16, alignItems: 'start' }}>
             {tiers.map((tier, i) => (
               <TierCard key={i} tier={tier} onSelect={() => navigate('/register')} />
             ))}
@@ -531,7 +556,7 @@ export default function Landing() {
             <span style={{ color: '#00C97A' }}>trading edge today</span>
           </h2>
           <p style={{ color: '#556080', fontSize: 14, marginBottom: 40, lineHeight: 1.8 }}>
-            Free to start. No credit card required.<br/>
+            Free to start. No credit card · No commitment · Full Elite access.<br/>
             Connect your MT5 in under 2 minutes.
           </p>
           <button onClick={() => navigate('/register')} style={{
