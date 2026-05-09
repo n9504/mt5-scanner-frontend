@@ -161,80 +161,86 @@ export default function Landing() {
     {
       name: 'Journal',
       price: 9,
-      desc: 'Unlimited journalling with weekly AI insights',
+      desc: 'Unlimited journalling — manual setup tagging',
       cta: 'Start Journalling',
       featured: false,
       features: [
-        'Unlimited trades — automated via MT5 EA',
-        'Full journal — entry, exit, screenshots',
+        'Unlimited trades — auto-synced via MT5 EA',
+        'Unlimited manual setup tagging (FVG, OB, BOS etc)',
+        'Unlimited auto session tagging (Asia/London/US)',
+        'Unlimited auto behaviour tagging (Calm/Fear/Greed etc)',
+        'Full journal — screenshots always stored',
         'Dashboard, calendar, performance reports',
         'Weekly AI behavioural insights',
-        'Plan & Edge tracker',
-        '1 account',
+        'Plan & Edge tracker · 1 account',
       ],
       excluded: [
-        'AI entry/exit analysis',
-        'Entry scoring',
+        'AI setup classification',
+        'AI entry scoring',
+        'AI structural analysis',
       ],
     },
     {
       name: 'Starter',
       price: 19,
-      desc: 'AI analysis for up to 10 trades per day',
+      desc: 'AI setup tagging for up to 10 trades/day',
       cta: 'Start Starter',
       featured: false,
       features: [
         'Everything in Journal',
-        'AI entry/exit analysis — up to 10 trades/day',
-        'Entry score + setup classification',
-        'Structural observations',
+        'AI setup classification — up to 10 trades/day',
+        'Unlimited manual setup tagging beyond limit',
+        'Unlimited auto session + behaviour tagging',
+        'AI entry score (1-10) + structural observations',
         'Trendline detection',
-        'Weekly AI behavioural report',
         '1 account',
       ],
     },
     {
       name: 'Growth',
       price: 29,
-      desc: 'AI analysis for up to 25 trades per day',
+      desc: 'AI setup tagging for up to 25 trades/day',
       cta: 'Start Growth',
       featured: true,
       features: [
         'Everything in Starter',
-        'AI entry/exit analysis — up to 25 trades/day',
+        'AI setup classification — up to 25 trades/day',
+        'Unlimited manual setup tagging beyond limit',
+        'Unlimited auto session + behaviour tagging',
         'Trading DNA after 50 trades',
-        'Behavioural contradiction detection',
-        'Behaviour drift detection',
+        'Behaviour contradiction detection',
         '2 accounts',
       ],
     },
     {
       name: 'Pro',
       price: 49,
-      desc: 'AI analysis for up to 50 trades per day',
+      desc: 'AI setup tagging for up to 50 trades/day',
       cta: 'Start Pro',
       featured: false,
       features: [
         'Everything in Growth',
-        'AI entry/exit analysis — up to 50 trades/day',
+        'AI setup classification — up to 50 trades/day',
+        'Unlimited manual setup tagging beyond limit',
+        'Unlimited auto session + behaviour tagging',
         'Trader personality profile',
         'Full behavioural scorecard',
-        'Priority support',
         '3 accounts',
       ],
     },
     {
       name: 'Elite',
       price: 79,
-      desc: 'Full AI analysis — up to 100 trades per day',
+      desc: 'AI setup tagging for up to 100 trades/day',
       cta: 'Start Elite',
       featured: false,
       features: [
         'Everything in Pro',
-        'AI entry/exit analysis — up to 100 trades/day',
+        'AI setup classification — up to 100 trades/day',
+        'Unlimited manual setup tagging beyond limit',
+        'Unlimited auto session + behaviour tagging',
         'Weekly AI narrative report',
-        'Expectancy metrics',
-        'Advanced behavioural analytics',
+        'Expectancy metrics + advanced analytics',
         '5 accounts',
       ],
     },
@@ -525,13 +531,13 @@ export default function Landing() {
             borderRadius:10, padding:'20px 28px', marginBottom:32, textAlign:'center' as const }}>
             <span style={{ fontSize:11, fontWeight:700, color:'#00C97A',
               textTransform:'uppercase' as const, letterSpacing:'.1em' }}>
-              🎉 Beta Launch — Limited Time
+              🎉 Beta Launch — Now Open
             </span>
             <p style={{ fontSize:14, color:'#E8ECF4', margin:'8px 0 4px', fontWeight:600 }}>
-              Sign up now and get 21 days of Elite access — completely free
+              Join during beta and get 21 days free — no credit card required
             </p>
             <p style={{ fontSize:12, color:'#556080', margin:0 }}>
-              No credit card · AI analysis up to 5 trades/day · Weekly insights · Unlimited journalling
+              Unlimited journalling · AI analysis up to 5 trades/day · Weekly behavioural insights · 1 account
             </p>
           </div>
 
