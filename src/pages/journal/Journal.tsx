@@ -248,11 +248,11 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                 {(['overview','charts','notes'] as const).map(t => (
                   <button key={t} onClick={() => {
                 setTab(t);
-                if (t === 'charts' && !screenshots && !loadingSS) {
+                if (t === 'charts' && !loadingSS) {
                   setLoadingSS(true);
                   api.get(`/api/v1/trades/${trade.id}/screenshots`)
-                    .then(r => { setScreenshots(r.data); })
-                    .catch(() => {})
+                    .then(r => { setScreenshots(r.data || {}); })
+                    .catch(() => { setScreenshots({}); })
                     .finally(() => setLoadingSS(false));
                 }
               }} style={{
@@ -333,20 +333,7 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                                 })()}
                               </div>
                             )}
-                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
-                              <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
-                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>ENTRY SCORE</div>
-                                <div style={{ fontSize:22, fontWeight:700,
-                                  color: ea.entry_score>=7?'#00C97A':ea.entry_score>=5?'#F0A500':'#f04060',
-                                  fontFamily:'Georgia,serif' }}>{ea.entry_score}/10</div>
-                              </div>
-                              <div style={{ background:'#111626', borderRadius:5, padding:'10px 12px', textAlign:'center' as const }}>
-                                <div style={{ fontSize:9, color:'#556080', marginBottom:4 }}>ENTRY QUALITY</div>
-                                <div style={{ fontSize:16, fontWeight:700,
-                                  color: ea.entry_quality==='Excellent'||ea.entry_quality==='Good'?'#00C97A':ea.entry_quality==='Average'?'#F0A500':'#f04060',
-                                  fontFamily:'Georgia,serif' }}>{ea.entry_quality || '—'}</div>
-                              </div>
-                            </div>
+
                             {/* Structural observation - no trading guidance */}
                             {(ea.structural_observation || ea.entry_reasoning) && (
                               <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>
@@ -425,10 +412,6 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                             letterSpacing:'.08em', marginBottom:10, display:'flex',
                             justifyContent:'space-between', alignItems:'center' }}>
                             <span>🧠 Exit Analysis</span>
-                            <span style={{ padding:'2px 8px', borderRadius:3, fontSize:10,
-                              background:'rgba(144,96,240,.12)', color:'#9060f0' }}>
-                              Exit score: {xa.exit_score}/10
-                            </span>
                           </div>
                           <div style={{ fontSize:12, color:'#8899b4', lineHeight:1.7, marginBottom:8 }}>{xa.overall_analysis}</div>
                           {xa.what_went_right && <div style={{ fontSize:11, color:'#00C97A', marginBottom:4 }}>✓ {xa.what_went_right}</div>}
@@ -522,7 +505,11 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                 <div style={{ textAlign:'center', color:'#556080', padding:'40px 0', fontSize:12 }}>
                   Loading charts...
                 </div>
-              ) : !screenshots?.screenshot_entry && !screenshots?.screenshot_h1_entry && !trade.screenshot_entry && !trade.screenshot_h1_entry ? (
+              ) : screenshots === null ? (
+                <div style={{ textAlign:'center', color:'#556080', padding:'40px 0', fontSize:12 }}>
+                  Click Charts tab to load
+                </div>
+              ) : !screenshots?.screenshot_entry && !screenshots?.screenshot_h1_entry ? (
                     <div style={{ textAlign:'center', color:'#556080', padding:'40px 0' }}>
                       <div style={{ fontSize:24, marginBottom:8 }}>
                         {trade.status === 'OPEN' ? '⏳' : '📸'}
