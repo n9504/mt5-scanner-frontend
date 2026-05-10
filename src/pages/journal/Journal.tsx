@@ -50,20 +50,55 @@ function Tag({ label, onRemove }: { label: string; onRemove?: () => void }) {
   );
 }
 
-function TagPicker({ selected, onChange }: { selected: string[]; onChange: (t: string[]) => void }) {
-  const [custom, setCustom] = useState('');
+function TagPicker({ selected, onChange, tradeId }: {
+  selected: string[];
+  onChange: (t: string[]) => void;
+  tradeId: string;
+}) {
+  const [customSetup,   setCustomSetup]   = useState<string[]>([]);
+  const [customMarket,  setCustomMarket]  = useState<string[]>([]);
+  const [newSetup,      setNewSetup]      = useState('');
+  const [newMarket,     setNewMarket]     = useState('');
+  const [customTag,     setCustomTag]     = useState('');
+
+  useEffect(() => {
+    import('../../api/client').then(({ default: api }) => {
+      api.get('/api/v1/trades/custom-tags')
+        .then((r:any) => {
+          const data = r.data || [];
+          setCustomSetup( data.filter((x:any) => x.category==='setup').map((x:any) => x.tag_name));
+          setCustomMarket(data.filter((x:any) => x.category==='market_condition').map((x:any) => x.tag_name));
+        }).catch(() => {});
+    });
+  }, []);
+
   const toggle = (t: string) =>
     onChange(selected.includes(t) ? selected.filter(x => x !== t) : [...selected, t]);
-  const addCustom = () => {
-    const v = custom.trim();
-    if (v && !selected.includes(v)) { onChange([...selected, v]); setCustom(''); }
+
+  const saveCustom = (category: string, tag: string, setter: (v:string)=>void, listSetter: (f:(p:string[])=>string[])=>void) => {
+    const v = tag.trim();
+    if (!v) return;
+    import('../../api/client').then(({ default: api }) => {
+      api.post('/api/v1/trades/custom-tags', { category, tag_name: v })
+        .then(() => {
+          listSetter(prev => prev.includes(v) ? prev : [...prev, v]);
+          if (!selected.includes(v)) onChange([...selected, v]);
+          setter('');
+        }).catch(() => {});
+    });
   };
-  const Section = ({ title, tags, color }: { title: string; tags: string[]; color: string }) => (
-    <div style={{ marginBottom:10 }}>
+
+  const addCustomTag = () => {
+    const v = customTag.trim();
+    if (v && !selected.includes(v)) { onChange([...selected, v]); setCustomTag(''); }
+  };
+
+  const TagSection = ({ title, defaultTags, customTags, color, newVal, setNew, category, setList }: any) => (
+    <div style={{ marginBottom:12 }}>
       <div style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
         letterSpacing:'.1em', marginBottom:5, fontWeight:600 }}>{title}</div>
-      <div style={{ display:'flex', flexWrap:'wrap' as const, gap:5 }}>
-        {tags.map(t => {
+      <div style={{ display:'flex', flexWrap:'wrap' as const, gap:5, marginBottom:6 }}>
+        {[...defaultTags, ...customTags].map((t:string) => {
           const active = selected.includes(t);
           return (
             <span key={t} onClick={() => toggle(t)} style={{
@@ -77,22 +112,42 @@ function TagPicker({ selected, onChange }: { selected: string[]; onChange: (t: s
           );
         })}
       </div>
+      <div style={{ display:'flex', gap:5 }}>
+        <input value={newVal} onChange={e => setNew(e.target.value)}
+          onKeyDown={(e:any) => e.key==='Enter' && saveCustom(category, newVal, setNew, setList)}
+          placeholder={`Add custom ${title.toLowerCase()}...`}
+          style={{ flex:1, padding:'4px 8px', background:'#111626',
+            border:'1px solid #1a1f30', borderRadius:4,
+            color:'#E8ECF4', fontSize:10, fontFamily:'inherit', outline:'none' }}/>
+        <button onClick={() => saveCustom(category, newVal, setNew, setList)} style={{
+          padding:'4px 10px', background:'#1a1f30', border:'none',
+          borderRadius:4, color:'#E8ECF4', fontSize:10, cursor:'pointer' }}>+</button>
+      </div>
     </div>
   );
+
   return (
     <div>
-      <Section title="Setup Tags"       tags={SETUP_TAGS}  color="#4090f0" />
-      <Section title="Market Condition" tags={MARKET_TAGS} color="#F0A500" />
-      <div style={{ display:'flex', gap:6, marginTop:6 }}>
-        <input value={custom} onChange={e => setCustom(e.target.value)}
-          onKeyDown={e => e.key==='Enter' && addCustom()}
-          placeholder="Add custom tag..."
-          style={{ flex:1, padding:'6px 10px', background:'#111626',
-            border:'1px solid #1a1f30', borderRadius:4,
-            color:'#E8ECF4', fontSize:11, fontFamily:'inherit', outline:'none' }}/>
-        <button onClick={addCustom} style={{
-          padding:'6px 14px', background:'#1a1f30', border:'none',
-          borderRadius:4, color:'#E8ECF4', fontSize:11, cursor:'pointer' }}>+</button>
+      <TagSection title="Setup Tags"       defaultTags={SETUP_TAGS}  customTags={customSetup}
+        color="#4090f0" newVal={newSetup}  setNew={setNewSetup}
+        category="setup"            setList={(f:any) => setCustomSetup(f)} />
+      <TagSection title="Market Condition" defaultTags={MARKET_TAGS} customTags={customMarket}
+        color="#F0A500" newVal={newMarket} setNew={setNewMarket}
+        category="market_condition" setList={(f:any) => setCustomMarket(f)} />
+      <div style={{ marginTop:4 }}>
+        <div style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
+          letterSpacing:'.1em', marginBottom:5, fontWeight:600 }}>Custom Tags</div>
+        <div style={{ display:'flex', gap:5 }}>
+          <input value={customTag} onChange={e => setCustomTag(e.target.value)}
+            onKeyDown={(e:any) => e.key==='Enter' && addCustomTag()}
+            placeholder="Add custom tag..."
+            style={{ flex:1, padding:'4px 8px', background:'#111626',
+              border:'1px solid #1a1f30', borderRadius:4,
+              color:'#E8ECF4', fontSize:10, fontFamily:'inherit', outline:'none' }}/>
+          <button onClick={addCustomTag} style={{
+            padding:'4px 10px', background:'#1a1f30', border:'none',
+            borderRadius:4, color:'#E8ECF4', fontSize:10, cursor:'pointer' }}>+</button>
+        </div>
       </div>
     </div>
   );
@@ -122,7 +177,16 @@ function formatDur(open: string, close: string) {
 
 function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void }) {
   const [open,      setOpen]      = useState(false);
-  const [tags,      setTags]      = useState<string[]>(trade.tags || []);
+  const SYSTEM_TAGS  = ['Asia','London','US','London/US Overlap',
+    'No Risk','Balanced Risk','Elevated Risk','Aggressive Risk',
+    'Clarity','Desperate','Reckless','Forcing Trade','Gamble',
+    'Calm','Disciplined','Fear','Panic','Lucky','Patient','Strategic',
+    'Impatient','Greedy','Conservative','TP Hit','SL Hit','Trail','Manual Close',
+    'News Risk'];
+  // Only editable tags (setup + market + custom) — exclude system computed ones
+  const [tags, setTags] = useState<string[]>(
+    (trade.tags || []).filter((t:string) => !SYSTEM_TAGS.includes(t))
+  );
   const [notes,     setNotes]     = useState(trade.notes || '');
   const [saving,    setSaving]    = useState(false);
   const [tab,       setTab]       = useState<'overview'|'charts'|'notes'>('overview');
@@ -136,8 +200,11 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
   const save = async () => {
     setSaving(true);
     try {
-      await api.put(`/api/v1/trades/${trade.id}/journal`, { notes, tags });
-      onUpdate({ ...trade, notes, tags });
+      // Preserve system tags, merge with user editable tags
+      const systemTagsOnTrade = (trade.tags || []).filter((t:string) => SYSTEM_TAGS.includes(t));
+      const mergedTags = Array.from(new Set([...systemTagsOnTrade, ...tags]));
+      await api.put(`/api/v1/trades/${trade.id}/journal`, { notes, tags: mergedTags });
+      onUpdate({ ...trade, notes, tags: mergedTags });
     } catch(e) {}
     setSaving(false);
   };
@@ -506,7 +573,7 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                           <Tag key={t} label={t} onRemove={() => setTags(tags.filter(x => x !== t))} />
                         ))}
                       </div>
-                      <TagPicker selected={tags} onChange={setTags} />
+                      <TagPicker selected={tags} onChange={setTags} tradeId={trade.id} />
                     </div>
                     <button onClick={save} disabled={saving} style={{
                       padding:'9px 20px', background:'#00C97A', border:'none',
