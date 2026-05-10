@@ -369,51 +369,47 @@ export default function Settings() {
       {/* SUBSCRIPTION */}
       {activeTab === 'subscription' && (
         <div>
-          <div style={{ marginBottom:20, padding:'16px 20px',
-            background:'rgba(0,201,122,0.05)', border:'1px solid rgba(0,201,122,0.15)',
-            borderRadius:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <div>
-              <div style={{ fontSize:12, color:'#556080', marginBottom:4 }}>Current Plan</div>
-              <div style={{ fontSize:18, fontWeight:700, color:'#E8ECF4', fontFamily:'Georgia,serif' }}>
-                {tierInfo.name} — <span style={{ color:tierInfo.color }}>{tierInfo.price}/mo</span>
-              </div>
+          {/* Beta banner */}
+          <div style={{ padding:'24px', background:'rgba(0,201,122,0.05)',
+            border:'1px solid rgba(0,201,122,0.2)', borderRadius:8, marginBottom:20, textAlign:'center' as const }}>
+            <div style={{ fontSize:11, color:'#00C97A', textTransform:'uppercase' as const,
+              letterSpacing:'.1em', fontWeight:700, marginBottom:8 }}>🎉 Beta Access Active</div>
+            <div style={{ fontSize:22, fontWeight:700, color:'#E8ECF4',
+              fontFamily:'Georgia,serif', marginBottom:8 }}>21 Days Free — Full Access</div>
+            <div style={{ fontSize:13, color:'#556080', lineHeight:1.6 }}>
+              You have full access to all TradePattrnly features during the beta period.
+              No credit card required. Pricing will be announced before beta ends.
             </div>
-            <span style={{ fontSize:11, padding:'4px 12px', borderRadius:4,
-              background:'rgba(0,201,122,.1)', color:'#00C97A', fontWeight:700 }}>Active</span>
+            {tenant?.beta_expires_at && (
+              <div style={{ marginTop:12, fontSize:12, color:'#F0A500' }}>
+                Beta expires: {new Date(tenant.beta_expires_at).toLocaleDateString('en-AU', {
+                  day:'numeric', month:'long', year:'numeric'
+                })}
+              </div>
+            )}
           </div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12, marginBottom:20 }}>
-            {TIERS.filter(t => t.key !== currentTier).map(tier => (
-              <div key={tier.key} style={{ background:'#0c0f1a',
-                border:`1px solid ${tier.color}25`, borderRadius:8, padding:20 }}>
-                <div style={{ display:'flex', justifyContent:'space-between',
-                  alignItems:'center', marginBottom:12 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color:'#E8ECF4' }}>{tier.name}</div>
-                  <div style={{ fontSize:16, fontWeight:700, color:tier.color }}>
-                    {tier.price}<span style={{ fontSize:11, color:'#556080' }}>/mo</span>
-                  </div>
-                </div>
-                <ul style={{ margin:'0 0 16px', padding:'0 0 0 16px',
-                  display:'flex', flexDirection:'column', gap:4 }}>
-                  {tier.features.map(f => (
-                    <li key={f} style={{ fontSize:12, color:'#8899b4' }}>{f}</li>
-                  ))}
-                </ul>
-                <button style={{ width:'100%', padding:'8px 0',
-                  background:'transparent', border:`1px solid ${tier.color}`,
-                  borderRadius:6, color:tier.color, fontSize:11, fontWeight:700,
-                  cursor:'pointer', letterSpacing:'.06em' }}>
-                  Upgrade to {tier.name}
-                </button>
-              </div>
+          {/* What's included */}
+          <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30', borderRadius:8, padding:20, marginBottom:16 }}>
+            <div style={{ fontSize:11, color:'#556080', textTransform:'uppercase' as const,
+              letterSpacing:'.08em', marginBottom:16 }}>Included in Beta</div>
+            {[
+              '✓ Automatic trade journalling via EA',
+              '✓ 5 AI entry + exit analyses per day',
+              '✓ Behavioural tagging — entry, exit, risk tags',
+              '✓ Performance reports by session, setup, behaviour',
+              '✓ Behavioural insights + weekly narrative',
+              '✓ Unlimited trade history',
+            ].map((f,i) => (
+              <div key={i} style={{ fontSize:13, color:'#8899b4', padding:'6px 0',
+                borderBottom:'1px solid #111626' }}>{f}</div>
             ))}
           </div>
 
-          <div style={{ padding:'14px 16px', background:'rgba(240,64,96,0.03)',
-            border:'1px solid rgba(240,64,96,0.1)', borderRadius:6,
+          <div style={{ padding:'14px 16px', background:'rgba(240,160,0,0.03)',
+            border:'1px solid rgba(240,160,0,0.15)', borderRadius:6,
             fontSize:12, color:'#556080', lineHeight:1.6 }}>
-            Cancel anytime — no lock-in. Subscription continues until end of billing period.{' '}
-            <span style={{ color:'#f04060', cursor:'pointer' }}>Cancel subscription</span>
+            Pricing plans will be available after the beta period. You'll be notified before any charges apply.
           </div>
         </div>
       )}
