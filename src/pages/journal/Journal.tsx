@@ -520,60 +520,43 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                   {/* Right - tags */}
                   <div>
                     <div style={{ marginBottom:12 }}>
-                      <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
-                        letterSpacing:'.08em', marginBottom:10 }}>Tags</div>
 
-                      {/* Categorised read-only display - 5 categories */}
+                      {/* TagPicker — one clean section each, no duplication */}
+                      <TagPicker selected={tags} onChange={setTags} tradeId={trade.id} />
+
+                      {/* System tags — read only, shown below picker */}
                       {(() => {
-                        const SETUP    = ['FVG','OB','BOS','CHoCH','Support','Resistance','Pullback','Trendline Touch','Trendline Break','Ascending Trendline','Descending Trendline','Horizontal Trendline'];
-                        const MARKET   = ['Trending','Ranging','Breakout','Reversal'];
-                        const RISK     = ['No Risk','Balanced Risk','Elevated Risk','Aggressive Risk'];
-
-                        const setupT   = tags.filter((t:string) => SETUP.includes(t));
-                        const marketT  = tags.filter((t:string) => MARKET.includes(t));
-                        const riskT    = tags.filter((t:string) => RISK.includes(t));
-                        const entryT   = (trade.entry_tags || []) as string[];
-                        const exitT    = (trade.exit_tags  || []) as string[];
-
+                        const entryT = (trade.entry_tags || []) as string[];
+                        const exitT  = (trade.exit_tags  || []) as string[];
+                        const RISK   = ['No Risk','Balanced Risk','Elevated Risk','Aggressive Risk'];
+                        const riskT  = (trade.tags || []).filter((t:string) => RISK.includes(t));
+                        if (!entryT.length && !exitT.length && !riskT.length) return null;
                         const Pill = ({ label, color }: any) => (
                           <span style={{ padding:'2px 9px', borderRadius:3, fontSize:10,
-                            fontWeight:700, background:`${color}18`, color,
-                            border:`1px solid ${color}30` }}>{label}</span>
+                            fontWeight:700, background:`${color}15`, color,
+                            border:`1px solid ${color}25` }}>{label}</span>
                         );
-
-                        const Row = ({ label, items, color }: any) => items.length === 0 ? null : (
+                        const SysRow = ({ label, items, color }: any) => items.length === 0 ? null : (
                           <div style={{ marginBottom:8 }}>
                             <div style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
                               letterSpacing:'.07em', marginBottom:4, fontWeight:600 }}>{label}</div>
                             <div style={{ display:'flex', flexWrap:'wrap' as const, gap:5 }}>
-                              {items.map((t: string, i: number) => <Pill key={i} label={t} color={color} />)}
+                              {items.map((t:string, i:number) => <Pill key={i} label={t} color={color} />)}
                             </div>
                           </div>
                         );
-
                         return (
-                          <div style={{ marginBottom:12 }}>
-                            <Row label="Setup Tags"        items={setupT}  color="#4090f0" />
-                            <Row label="Market Condition"  items={marketT} color="#F0A500" />
-                            <Row label="Entry Tags"        items={entryT}  color="#9060f0" />
-                            <Row label="Risk Tags"         items={riskT}   color="#f04060" />
-                            <Row label="Exit Tags"         items={exitT}   color="#00C97A" />
-                            {tags.length === 0 && (
-                              <span style={{ fontSize:11, color:'#3a4560', fontStyle:'italic' as const }}>
-                                No tags yet
-                              </span>
-                            )}
+                          <div style={{ marginTop:14, paddingTop:12, borderTop:'1px solid #111626' }}>
+                            <div style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
+                              letterSpacing:'.07em', marginBottom:8, fontWeight:600 }}>
+                              System Tags — read only
+                            </div>
+                            <SysRow label="Entry Tags" items={entryT} color="#9060f0" />
+                            <SysRow label="Exit Tags"  items={exitT}  color="#00C97A" />
+                            <SysRow label="Risk Tags"  items={riskT}  color="#f04060" />
                           </div>
                         );
                       })()}
-
-                      {/* Editable tags for manual setup tagging */}
-                      <div style={{ display:'flex', flexWrap:'wrap' as const, gap:6, marginBottom:14, minHeight:32 }}>
-                        {tags.map(t => (
-                          <Tag key={t} label={t} onRemove={() => setTags(tags.filter(x => x !== t))} />
-                        ))}
-                      </div>
-                      <TagPicker selected={tags} onChange={setTags} tradeId={trade.id} />
                     </div>
                     <button onClick={save} disabled={saving} style={{
                       padding:'9px 20px', background:'#00C97A', border:'none',
