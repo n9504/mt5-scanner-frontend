@@ -30,8 +30,8 @@ const TAG_COLORS: Record<string, { bg: string; color: string }> = {
   'Manual Close':{ bg: 'rgba(85,96,128,.12)',  color: '#556080' },
 };
 
-const SETUP_TAGS   = ['FVG','OB','BOS','CHoCH','Support','Resistance','Breakout','Range','Trend','Reversal'];
-const EMOTION_TAGS = ['Disciplined','FOMO','Revenge','Hesitated','Overconfident','Patient'];
+const SETUP_TAGS     = ['FVG','OB','BOS','CHoCH','Support','Resistance','Pullback','Trendline Touch','Trendline Break'];
+const MARKET_TAGS    = ['Trending','Ranging','Breakout','Reversal'];
 
 function Tag({ label, onRemove }: { label: string; onRemove?: () => void }) {
   const c = TAG_COLORS[label] || { bg: 'rgba(85,96,128,.12)', color: '#556080' };
@@ -58,29 +58,32 @@ function TagPicker({ selected, onChange }: { selected: string[]; onChange: (t: s
     const v = custom.trim();
     if (v && !selected.includes(v)) { onChange([...selected, v]); setCustom(''); }
   };
-  const Section = ({ title, tags }: { title: string; tags: string[] }) => (
-    <div style={{ marginBottom:12 }}>
-      <div style={{ fontSize:9, color:'#556080', textTransform:'uppercase',
-        letterSpacing:'.1em', marginBottom:6 }}>{title}</div>
-      <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
-        {tags.map(t => (
-          <span key={t} onClick={() => toggle(t)} style={{
-            padding:'3px 10px', borderRadius:4, fontSize:10, fontWeight:700,
-            cursor:'pointer', userSelect:'none',
-            border:`1px solid ${selected.includes(t) ? (TAG_COLORS[t]?.color||'#556080') : '#252d42'}`,
-            color: selected.includes(t) ? (TAG_COLORS[t]?.color||'#556080') : '#556080',
-            background: selected.includes(t) ? (TAG_COLORS[t]?.bg||'transparent') : 'transparent',
-            transition:'all .15s',
-          }}>{t}</span>
-        ))}
+  const Section = ({ title, tags, color }: { title: string; tags: string[]; color: string }) => (
+    <div style={{ marginBottom:10 }}>
+      <div style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
+        letterSpacing:'.1em', marginBottom:5, fontWeight:600 }}>{title}</div>
+      <div style={{ display:'flex', flexWrap:'wrap' as const, gap:5 }}>
+        {tags.map(t => {
+          const active = selected.includes(t);
+          return (
+            <span key={t} onClick={() => toggle(t)} style={{
+              padding:'3px 10px', borderRadius:4, fontSize:10, fontWeight:700,
+              cursor:'pointer', userSelect:'none' as const,
+              border:`1px solid ${active ? color : '#252d42'}`,
+              color: active ? color : '#556080',
+              background: active ? `${color}15` : 'transparent',
+              transition:'all .15s',
+            }}>{t}</span>
+          );
+        })}
       </div>
     </div>
   );
   return (
     <div>
-      <Section title="Setup" tags={SETUP_TAGS} />
-      <Section title="Emotion" tags={EMOTION_TAGS} />
-      <div style={{ display:'flex', gap:6 }}>
+      <Section title="Setup Tags"       tags={SETUP_TAGS}  color="#4090f0" />
+      <Section title="Market Condition" tags={MARKET_TAGS} color="#F0A500" />
+      <div style={{ display:'flex', gap:6, marginTop:6 }}>
         <input value={custom} onChange={e => setCustom(e.target.value)}
           onKeyDown={e => e.key==='Enter' && addCustom()}
           placeholder="Add custom tag..."
@@ -453,19 +456,17 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                       <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
                         letterSpacing:'.08em', marginBottom:10 }}>Tags</div>
 
-                      {/* Categorised read-only display */}
+                      {/* Categorised read-only display - 5 categories */}
                       {(() => {
                         const SETUP    = ['FVG','OB','BOS','CHoCH','Support','Resistance','Pullback','Trendline Touch','Trendline Break','Ascending Trendline','Descending Trendline','Horizontal Trendline'];
                         const MARKET   = ['Trending','Ranging','Breakout','Reversal'];
-                        const SESSION  = ['Asia','London','US','London/US Overlap'];
-                        const EMOTION  = ['Calm','Fear','Greed','Disciplined','Panic','Patient','Impatient','Strategic','Conservative','FOMO','Hesitated','Overconfident','News Risk','TP Hit','SL Hit','Trail','Manual Close'];
                         const RISK     = ['No Risk','Balanced Risk','Elevated Risk','Aggressive Risk'];
 
-                        const setupT   = tags.filter(t => SETUP.includes(t));
-                        const marketT  = tags.filter(t => MARKET.includes(t));
-                        const sessionT = tags.filter(t => SESSION.includes(t));
-                        const emotionT = tags.filter(t => EMOTION.includes(t));
-                        const riskT    = tags.filter(t => RISK.includes(t));
+                        const setupT   = tags.filter((t:string) => SETUP.includes(t));
+                        const marketT  = tags.filter((t:string) => MARKET.includes(t));
+                        const riskT    = tags.filter((t:string) => RISK.includes(t));
+                        const entryT   = (trade.entry_tags || []) as string[];
+                        const exitT    = (trade.exit_tags  || []) as string[];
 
                         const Pill = ({ label, color }: any) => (
                           <span style={{ padding:'2px 9px', borderRadius:3, fontSize:10,
@@ -485,11 +486,11 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
 
                         return (
                           <div style={{ marginBottom:12 }}>
-                            <Row label="Setup"     items={setupT}   color="#4090f0" />
-                            <Row label="Market"    items={marketT}  color="#F0A500" />
-                            <Row label="Session"   items={sessionT} color="#9060f0" />
-                            <Row label="Behaviour" items={emotionT} color="#00C97A" />
-                            <Row label="Risk"      items={riskT}    color="#f04060" />
+                            <Row label="Setup Tags"        items={setupT}  color="#4090f0" />
+                            <Row label="Market Condition"  items={marketT} color="#F0A500" />
+                            <Row label="Entry Tags"        items={entryT}  color="#9060f0" />
+                            <Row label="Risk Tags"         items={riskT}   color="#f04060" />
+                            <Row label="Exit Tags"         items={exitT}   color="#00C97A" />
                             {tags.length === 0 && (
                               <span style={{ fontSize:11, color:'#3a4560', fontStyle:'italic' as const }}>
                                 No tags yet

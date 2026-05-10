@@ -176,31 +176,79 @@ export default function Reports() {
             </div>
           )}
 
-          {/* Performance by Setup, Session, Market Condition */}
+          {/* 7 Performance Report Sections */}
           {(() => {
-            const SETUP_TAGS = ['FVG','OB','BOS','CHoCH','Support','Resistance','Trendline Touch','Trendline Break'];
-            const SESSION_TAGS = ['Asia','London','US','London/US Overlap'];
-            const MARKET_TAGS = ['Trending','Range','Breakout','Reversal','High Volatility','Low Volatility','News Driven'];
+            const SETUP_TAGS   = ['FVG','OB','BOS','CHoCH','Support','Resistance','Pullback','Trendline Touch','Trendline Break'];
+            const MARKET_TAGS  = ['Trending','Ranging','Breakout','Reversal'];
+            const ENTRY_SESS   = ['Asia','London','US','London/US Overlap'];
+            const PLAN_TAGS    = ['Clarity','Desperate','Reckless','Forcing Trade','Gamble'];
+            const RISK_TAGS    = ['No Risk','Balanced Risk','Elevated Risk','Aggressive Risk'];
+            const EXIT_BEHAV   = ['Calm','Disciplined','Fear','Panic','Lucky','Patient','Strategic','Impatient','Greedy','Conservative'];
+            const EXIT_SESS    = ['Asia','London','US','London/US Overlap'];
 
-            function tagStats(tagList: string[]) {
-              return tagList.map(tag => {
-                const tagged = trades.filter((t:any) => (t.tags||[]).includes(tag));
+            // Helper: stats from flat tags array
+            function tagStats(tagList: string[], field: string = 'tags') {
+              return tagList.map((tag: string) => {
+                const tagged = trades.filter((t:any) => ((t[field] as string[])||[]).includes(tag));
                 const wins   = tagged.filter((t:any) => (t.execution_outcome||'').startsWith('WIN')).length;
                 const pnl    = tagged.reduce((s:number,t:any) => s+parseFloat(t.net_pnl||0),0);
                 const wr     = tagged.length > 0 ? Math.round(wins/tagged.length*100) : 0;
                 const avgPnl = tagged.length > 0 ? pnl/tagged.length : 0;
                 const conf   = tagged.length >= 10 ? 'High' : tagged.length >= 5 ? 'Medium' : 'Low';
                 return { tag, total:tagged.length, wins, wr, pnl:parseFloat(pnl.toFixed(2)), avgPnl:parseFloat(avgPnl.toFixed(2)), conf };
-              }).filter(s => s.total > 0).sort((a,b) => b.wr - a.wr);
+              }).filter((s:any) => s.total > 0).sort((a:any,b:any) => b.wr - a.wr);
             }
 
-            function TagTable({ title, data, color }: any) {
+            // Cross-session analysis
+            function crossSession() {
+              const combos: Record<string,{wins:number,total:number,pnl:number}> = {};
+              trades.forEach((t:any) => {
+                const entryS = ((t.entry_tags||[]) as string[]).find(x => ENTRY_SESS.includes(x)) || '';
+                const exitS  = ((t.exit_tags ||[]) as string[]).find(x => EXIT_SESS.includes(x))  || '';
+                if (!entryS || !exitS) return;
+                const key = `${entryS} → ${exitS}`;
+                if (!combos[key]) combos[key] = {wins:0,total:0,pnl:0};
+                combos[key].total++;
+                combos[key].pnl += parseFloat(t.net_pnl||0);
+                if ((t.execution_outcome||'').startsWith('WIN')) combos[key].wins++;
+              });
+              return Object.entries(combos).map(([key,v]) => ({
+                tag: key,
+                total: v.total,
+                wins: v.wins,
+                wr: Math.round(v.wins/v.total*100),
+                pnl: parseFloat(v.pnl.toFixed(2)),
+                avgPnl: parseFloat((v.pnl/v.total).toFixed(2)),
+                conf: v.total >= 10 ? 'High' : v.total >= 5 ? 'Medium' : 'Low',
+              })).sort((a,b) => b.wr - a.wr);
+            }
+
+            function sameVsCross() {
+              const same: any[] = []; const cross: any[] = [];
+              trades.forEach((t:any) => {
+                const entryS = ((t.entry_tags||[]) as string[]).find(x => ENTRY_SESS.includes(x)) || '';
+                const exitS  = ((t.exit_tags ||[]) as string[]).find(x => EXIT_SESS.includes(x))  || '';
+                if (!entryS || !exitS) return;
+                if (entryS === exitS) same.push(t); else cross.push(t);
+              });
+              function summarise(list: any[], label: string) {
+                const wins = list.filter(t => (t.execution_outcome||'').startsWith('WIN')).length;
+                const pnl  = list.reduce((s:number,t:any) => s+parseFloat(t.net_pnl||0),0);
+                const wr   = list.length > 0 ? Math.round(wins/list.length*100) : 0;
+                return { tag: label, total: list.length, wins, wr, pnl: parseFloat(pnl.toFixed(2)),
+                  avgPnl: list.length > 0 ? parseFloat((pnl/list.length).toFixed(2)) : 0,
+                  conf: list.length >= 10 ? 'High' : list.length >= 5 ? 'Medium' : 'Low' };
+              }
+              return [summarise(same,'Same session'), summarise(cross,'Cross session')].filter(s=>s.total>0);
+            }
+
+            function PerfTable({ title, data, color }: any) {
               if (!data.length) return null;
               return (
                 <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30', borderRadius:8, padding:20, marginBottom:16 }}>
                   <div style={{ fontSize:11, color:'#556080', textTransform:'uppercase' as const,
                     letterSpacing:'.08em', fontWeight:700, marginBottom:14 }}>{title}</div>
-                  <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                  <table style={{ width:'100%', borderCollapse:'collapse' as const }}>
                     <thead>
                       <tr>{['Tag','Trades','Win Rate','Avg P&L','Net P&L','Confidence'].map(h=>(
                         <th key={h} style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
@@ -212,19 +260,19 @@ export default function Reports() {
                     <tbody>
                       {data.map((d:any,i:number) => (
                         <tr key={i} style={{ borderBottom:'1px solid #0c0f1a' }}>
-                          <td style={{ padding:'8px 10px', fontSize:12, fontWeight:600, color:'#E8ECF4' }}>{d.tag}</td>
-                          <td style={{ padding:'8px 10px', fontSize:11, color:'#556080', textAlign:'right' as const }}>{d.total}</td>
+                          <td style={{ padding:'8px 10px', fontSize:12, fontWeight:600,
+                            color:'#E8ECF4' }}>{d.tag}</td>
+                          <td style={{ padding:'8px 10px', fontSize:11, color:'#556080',
+                            textAlign:'right' as const }}>{d.total}</td>
                           <td style={{ padding:'8px 10px', fontSize:12, fontWeight:700,
                             color:d.wr>=55?'#00C97A':d.wr>=40?'#F0A500':'#f04060',
                             textAlign:'right' as const }}>{d.wr}%</td>
                           <td style={{ padding:'8px 10px', fontSize:11,
                             color:d.avgPnl>=0?'#00C97A':'#f04060', textAlign:'right' as const }}>
-                            {d.avgPnl>=0?'+$':'-$'}{Math.abs(d.avgPnl).toFixed(2)}
-                          </td>
+                            {d.avgPnl>=0?'+':''}{d.avgPnl.toFixed(2)}</td>
                           <td style={{ padding:'8px 10px', fontSize:11,
                             color:d.pnl>=0?'#00C97A':'#f04060', textAlign:'right' as const }}>
-                            {d.pnl>=0?'+$':'-$'}{Math.abs(d.pnl).toFixed(2)}
-                          </td>
+                            {d.pnl>=0?'+':''}{d.pnl.toFixed(2)}</td>
                           <td style={{ padding:'8px 10px', textAlign:'right' as const }}>
                             <span style={{ fontSize:9, padding:'2px 6px', borderRadius:3, fontWeight:700,
                               color:d.conf==='High'?'#00C97A':d.conf==='Medium'?'#F0A500':'#556080',
@@ -242,9 +290,13 @@ export default function Reports() {
 
             return (
               <>
-                <TagTable title="Performance by Setup" data={tagStats(SETUP_TAGS)} color="#4090f0" />
-                <TagTable title="Performance by Session" data={tagStats(SESSION_TAGS)} color="#9060f0" />
-                <TagTable title="Performance by Market Condition" data={tagStats(MARKET_TAGS)} color="#F0A500" />
+                <PerfTable title="1. Performance by Setup Tag"          data={tagStats(SETUP_TAGS,'tags')}      color="#4090f0" />
+                <PerfTable title="2. Performance by Market Condition"   data={tagStats(MARKET_TAGS,'tags')}     color="#F0A500" />
+                <PerfTable title="3. Performance by Entry Tag"          data={tagStats([...ENTRY_SESS,...PLAN_TAGS],'entry_tags')} color="#9060f0" />
+                <PerfTable title="4. Performance by Exit Tag"           data={tagStats([...EXIT_SESS,...EXIT_BEHAV],'exit_tags')}  color="#00C97A" />
+                <PerfTable title="5. Performance by Risk"               data={tagStats(RISK_TAGS,'tags')}       color="#f04060" />
+                <PerfTable title="6. Same vs Cross Session"             data={sameVsCross()}                    color="#4090f0" />
+                <PerfTable title="7. Cross Session Breakdown"           data={crossSession()}                   color="#9060f0" />
               </>
             );
           })()}
