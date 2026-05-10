@@ -50,6 +50,7 @@ function AccountConfig({ account, onSaved }: { account: any; onSaved: () => void
     daily_profit_target:     account.daily_profit_target || '',
     daily_loss_cap:          account.daily_loss_cap || '',
     risk_per_trade_pct:      account.risk_per_trade_pct || '1',
+    max_trades_per_day:      account.max_trades_per_day || '4',
     prop_max_loss_per_trade: account.prop_max_loss_per_trade || '',
     prop_daily_max_loss:     account.prop_daily_max_loss || '',
     prop_5day_max_loss:      account.prop_5day_max_loss || '',
@@ -65,7 +66,8 @@ function AccountConfig({ account, onSaved }: { account: any; onSaved: () => void
     try {
       const endpoint = type === 'prop' ? '/api/v1/setup/prop' : '/api/v1/setup/personal';
       const body: any = { account_id: account.id, timezone: form.timezone,
-        risk_per_trade_pct: parseFloat(form.risk_per_trade_pct) || 1 };
+        risk_per_trade_pct: parseFloat(form.risk_per_trade_pct) || 1,
+        max_trades_per_day: parseInt(form.max_trades_per_day) || 4 };
       if (type === 'personal') {
         if (form.daily_profit_target) body.daily_profit_target = parseFloat(form.daily_profit_target);
         if (form.daily_loss_cap)      body.daily_loss_cap      = parseFloat(form.daily_loss_cap);
@@ -124,6 +126,7 @@ function AccountConfig({ account, onSaved }: { account: any; onSaved: () => void
         {type === 'personal' ? <>
           <Field label="Daily Profit Target" {...f('daily_profit_target')} suffix="$" />
           <Field label="Daily Loss Cap" {...f('daily_loss_cap')} suffix="$" />
+          <Field label="Max Trades Per Day" {...f('max_trades_per_day')} suffix="trades" />
           <Field label="Risk Per Trade" {...f('risk_per_trade_pct')} suffix="%" />
         </> : <>
           <Field label="Max Loss Per Trade" {...f('prop_max_loss_per_trade')} suffix="$" />
@@ -131,6 +134,7 @@ function AccountConfig({ account, onSaved }: { account: any; onSaved: () => void
           <Field label="5-Day Max Loss" {...f('prop_5day_max_loss')} suffix="$" />
           <Field label="Profit Cap" {...f('prop_profit_cap')} suffix="$" />
           <Field label="Challenge Target" {...f('prop_challenge_target')} suffix="$" />
+          <Field label="Max Trades Per Day" {...f('max_trades_per_day')} suffix="trades" />
           <Field label="Risk Per Trade" {...f('risk_per_trade_pct')} suffix="%" />
         </>}
       </div>
