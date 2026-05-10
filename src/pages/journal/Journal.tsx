@@ -712,9 +712,17 @@ export default function Journal() {
   const [filterSymbol,  setFilterSymbol]  = useState('');
   const [filterTag,     setFilterTag]     = useState('');
   const [filterResult,  setFilterResult]  = useState('all');
-  const defaultFrom = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
-  const [filterFrom,    setFilterFrom]    = useState(defaultFrom);
-  const [filterTo,      setFilterTo]      = useState('');
+  const getWeekStart = () => {
+    const d = new Date();
+    const day = d.getDay(); // 0=Sun
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Mon
+    d.setDate(diff);
+    return d.toISOString().slice(0,10);
+  };
+  const defaultFrom = getWeekStart();
+  const defaultTo   = new Date().toISOString().slice(0,10);
+  const [filterFrom, setFilterFrom] = useState(defaultFrom);
+  const [filterTo,   setFilterTo]   = useState(defaultTo);
 
   const load = async (force=false) => {
     const cacheKey = `journal_trades_all`;
