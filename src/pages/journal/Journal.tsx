@@ -122,7 +122,6 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
   const [tags,      setTags]      = useState<string[]>(trade.tags || []);
   const [notes,     setNotes]     = useState(trade.notes || '');
   const [saving,    setSaving]    = useState(false);
-  const [analysing, setAnalysing] = useState(false);
   const [tab,       setTab]       = useState<'overview'|'charts'|'notes'>('overview');
   const [screenshots, setScreenshots] = useState<any>(null);
   const [loadingSS,   setLoadingSS]   = useState(false);
@@ -140,26 +139,6 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
     setSaving(false);
   };
 
-  const analyse = async () => {
-    setAnalysing(true);
-    try {
-      await api.post(`/api/v1/trades/${trade.id}/analyse`);
-      // Poll for result
-      let n = 0;
-      const t = setInterval(async () => {
-        n++;
-        try {
-          const r = await api.get(`/api/v1/trades?status=CLOSED&period=all`);
-          const u = (r.data||[]).find((x: any) => x.id === trade.id);
-          if (u?.ai_analysis || n > 10) {
-            clearInterval(t);
-            if (u) { setTags(u.tags||[]); onUpdate(u); }
-            setAnalysing(false);
-          }
-        } catch { clearInterval(t); setAnalysing(false); }
-      }, 3000);
-    } catch { setAnalysing(false); }
-  };
 
   const exitQ    = trade.exit_quality;
   const exitColor = exitQ === 'PERFECT' ? '#00C97A' : exitQ === 'EARLY' ? '#F0A500' : '#4090f0';
@@ -342,7 +321,7 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                             )}
                             {(ea.key_zone || ea.key_level) && (
                               <div style={{ fontSize:11, color:'#F0A500', marginBottom:4 }}>
-                                📍 Key zone: {ea.key_zone || ea.key_level}
+                                📍 Key structural zone identified
                               </div>
                             )}
                             {ea.trendline_touches > 0 && (
@@ -421,14 +400,13 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                           {xa.lesson && <div style={{ fontSize:11, color:'#F0A500', marginTop:4 }}>💡 {xa.lesson}</div>}
                         </div>
                       ) : (
-                        <button onClick={analyse} disabled={analysing} style={{
-                          width:'100%', padding:'10px', background:'rgba(144,96,240,.08)',
-                          border:'1px solid rgba(144,96,240,.2)', borderRadius:6,
-                          color:'#9060f0', fontSize:11, fontWeight:700, cursor:'pointer',
-                          letterSpacing:'.06em', marginBottom:10,
-                        }}>
-                          {analysing ? '🧠 Analysing...' : '🧠 Run AI Analysis'}
-                        </button>
+                        trade.status === 'CLOSED' ? (
+                          <div style={{ padding:'10px', background:'rgba(144,96,240,.05)',
+                            border:'1px solid rgba(144,96,240,.1)', borderRadius:6,
+                            color:'#556080', fontSize:11, textAlign:'center' as const, marginBottom:10 }}>
+                            🧠 Exit analysis runs automatically after trade closes
+                          </div>
+                        ) : null
                       );
                     })()}
 

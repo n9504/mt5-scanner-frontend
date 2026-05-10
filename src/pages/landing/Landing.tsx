@@ -318,7 +318,7 @@ export default function Landing() {
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#00C97A'; (e.currentTarget as HTMLElement).style.color = '#00C97A'; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#252d42'; (e.currentTarget as HTMLElement).style.color = '#E8ECF4'; }}
           >Sign In</button>
-          <button onClick={() => navigate('/register')} style={{
+          <button onClick={() => { window.location.href='/register'; }} style={{
             padding: '8px 20px', background: '#00C97A',
             border: 'none', borderRadius: 6,
             color: '#000', fontSize: 12, fontWeight: 700,
@@ -379,7 +379,7 @@ export default function Landing() {
         </p>
 
         <div className="slide-up-3" style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button onClick={() => navigate('/register')} style={{
+          <button onClick={() => { window.location.href='/register'; }} style={{
             padding: '14px 32px', background: '#00C97A', border: 'none',
             borderRadius: 8, color: '#000', fontSize: 14, fontWeight: 700,
             cursor: 'pointer', letterSpacing: '.06em',
@@ -540,7 +540,7 @@ export default function Landing() {
             Free to start. No credit card · No commitment · Full Elite access.<br/>
             Connect your MT5 in under 2 minutes.
           </p>
-          <button onClick={() => navigate('/register')} style={{
+          <button onClick={() => { window.location.href='/register'; }} style={{
             padding: '16px 48px', background: '#00C97A', border: 'none',
             borderRadius: 8, color: '#000', fontSize: 15, fontWeight: 700,
             cursor: 'pointer', letterSpacing: '.06em',
@@ -616,4 +616,34 @@ export default function Landing() {
       </footer>
     </div>
   );
-}
+}      <section id="pricing" style={{ padding: '80px 48px', borderTop: '1px solid #1a1f30' }}>
+        <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontSize:11, color:'#00C97A', textTransform:'uppercase' as const,
+            letterSpacing:'.12em', marginBottom:12 }}>Beta Launch</div>
+          <h2 style={{ fontSize:36, fontWeight:700, fontFamily:'Georgia,serif',
+            color:'#E8ECF4', marginBottom:16, lineHeight:1.2 }}>
+            Free during beta
+          </h2>
+          <p style={{ color:'#556080', fontSize:14, lineHeight:1.8, marginBottom:12 }}>
+            Join now and get 21 days of full access — no credit card required.
+          </p>
+          <div style={{ display:'flex', justifyContent:'center', gap:16,
+            flexWrap:'wrap' as const, fontSize:13, color:'#8899b4', marginBottom:32 }}>
+            <span>✓ Unlimited journalling</span>
+            <span>✓ AI analysis — 5 trades/day</span>
+            <span>✓ Weekly behavioural insights</span>
+            <span>✓ 1 account</span>
+          </div>
+          <button onClick={() => { window.location.href='/register'; }} style={{
+            padding:'14px 40px', background:'#00C97A', border:'none',
+            borderRadius:8, color:'#000', fontSize:14, fontWeight:700,
+            cursor:'pointer', letterSpacing:'.06em',
+            boxShadow:'0 0 32px rgba(0,201,122,0.25)',
+          }}>Join Beta Free →</button>
+          <p style={{ fontSize:11, color:'#3a4560', marginTop:12 }}>
+            Paid plans launching after beta · Pricing will be announced
+          </p>
+        </div>
+      </section>
+
+
