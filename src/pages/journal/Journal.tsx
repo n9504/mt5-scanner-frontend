@@ -450,17 +450,59 @@ function TradeRow({ trade, onUpdate }: { trade: any; onUpdate: (t: any) => void 
                   {/* Right - tags */}
                   <div>
                     <div style={{ marginBottom:12 }}>
-                      <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase',
+                      <div style={{ fontSize:10, color:'#556080', textTransform:'uppercase' as const,
                         letterSpacing:'.08em', marginBottom:10 }}>Tags</div>
-                      <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:14,
-                        minHeight:32 }}>
-                        {tags.length === 0 ? (
-                          <span style={{ fontSize:11, color:'#3a4560', fontStyle:'italic' }}>
-                            No tags yet
-                          </span>
-                        ) : tags.map(t => (
-                          <Tag key={t} label={t}
-                            onRemove={() => setTags(tags.filter(x => x !== t))} />
+
+                      {/* Categorised read-only display */}
+                      {(() => {
+                        const SETUP    = ['FVG','OB','BOS','CHoCH','Support','Resistance','Pullback','Trendline Touch','Trendline Break','Ascending Trendline','Descending Trendline','Horizontal Trendline'];
+                        const MARKET   = ['Trending','Ranging','Breakout','Reversal'];
+                        const SESSION  = ['Asia','London','US','London/US Overlap'];
+                        const EMOTION  = ['Calm','Fear','Greed','Disciplined','Panic','Patient','Impatient','Strategic','Conservative','FOMO','Hesitated','Overconfident','News Risk','TP Hit','SL Hit','Trail','Manual Close'];
+                        const RISK     = ['No Risk','Balanced Risk','Elevated Risk','Aggressive Risk'];
+
+                        const setupT   = tags.filter(t => SETUP.includes(t));
+                        const marketT  = tags.filter(t => MARKET.includes(t));
+                        const sessionT = tags.filter(t => SESSION.includes(t));
+                        const emotionT = tags.filter(t => EMOTION.includes(t));
+                        const riskT    = tags.filter(t => RISK.includes(t));
+
+                        const Pill = ({ label, color }: any) => (
+                          <span style={{ padding:'2px 9px', borderRadius:3, fontSize:10,
+                            fontWeight:700, background:`${color}18`, color,
+                            border:`1px solid ${color}30` }}>{label}</span>
+                        );
+
+                        const Row = ({ label, items, color }: any) => items.length === 0 ? null : (
+                          <div style={{ marginBottom:8 }}>
+                            <div style={{ fontSize:9, color:'#3a4560', textTransform:'uppercase' as const,
+                              letterSpacing:'.07em', marginBottom:4, fontWeight:600 }}>{label}</div>
+                            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:5 }}>
+                              {items.map((t: string, i: number) => <Pill key={i} label={t} color={color} />)}
+                            </div>
+                          </div>
+                        );
+
+                        return (
+                          <div style={{ marginBottom:12 }}>
+                            <Row label="Setup"     items={setupT}   color="#4090f0" />
+                            <Row label="Market"    items={marketT}  color="#F0A500" />
+                            <Row label="Session"   items={sessionT} color="#9060f0" />
+                            <Row label="Behaviour" items={emotionT} color="#00C97A" />
+                            <Row label="Risk"      items={riskT}    color="#f04060" />
+                            {tags.length === 0 && (
+                              <span style={{ fontSize:11, color:'#3a4560', fontStyle:'italic' as const }}>
+                                No tags yet
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Editable tags for manual setup tagging */}
+                      <div style={{ display:'flex', flexWrap:'wrap' as const, gap:6, marginBottom:14, minHeight:32 }}>
+                        {tags.map(t => (
+                          <Tag key={t} label={t} onRemove={() => setTags(tags.filter(x => x !== t))} />
                         ))}
                       </div>
                       <TagPicker selected={tags} onChange={setTags} />
