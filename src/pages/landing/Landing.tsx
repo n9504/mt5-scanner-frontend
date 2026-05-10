@@ -50,88 +50,7 @@ const AnimatedChart = () => {
 };
 
 // ── TIER CARD ──
-const TierCard = ({ tier, onSelect }: { tier: any, onSelect: () => void }) => {
-  if (tier.locked) return (
-    <div style={{ background:'#0c0f1a', border:'1px solid #1a1f30',
-      borderRadius:16, padding:'32px 28px', opacity:0.45,
-      textAlign:'center' as const, display:'flex', flexDirection:'column' as const,
-      alignItems:'center', justifyContent:'center', minHeight:200 }}>
-      <div style={{ fontSize:28, marginBottom:12 }}>🔒</div>
-      <div style={{ fontSize:14, fontWeight:700, color:'#E8ECF4', marginBottom:6 }}>
-        {tier.name}
-      </div>
-      <div style={{ fontSize:11, color:'#556080' }}>{tier.desc}</div>
-    </div>
-  );
-  return (
-  <div style={{
-    background: tier.featured ? 'linear-gradient(135deg, #0a1628, #0d2040)' : '#0c0f1a',
-    border: `1px solid ${tier.featured ? '#00C97A' : '#1a1f30'}`,
-    borderRadius: 16,
-    padding: '32px 28px',
-    position: 'relative',
-    transform: tier.featured ? 'scale(1.05)' : 'scale(1)',
-    boxShadow: tier.featured ? '0 0 40px rgba(0,201,122,0.15)' : 'none',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-    cursor: 'default',
-  }}
-  onMouseEnter={e => { if (!tier.featured) (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)'; }}
-  onMouseLeave={e => { if (!tier.featured) (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
-  >
-    {tier.featured && (
-      <div style={{
-        position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
-        background: '#00C97A', color: '#000', padding: '4px 16px',
-        borderRadius: 20, fontSize: 11, fontWeight: 700, letterSpacing: '.08em',
-        textTransform: 'uppercase',
-      }}>Most Popular</div>
-    )}
-    <div style={{ fontSize: 11, color: '#556080', textTransform: 'uppercase',
-      letterSpacing: '.1em', marginBottom: 8 }}>{tier.name}</div>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
-      <span style={{ fontSize: 40, fontWeight: 700, color: '#E8ECF4',
-        fontFamily: 'Georgia, serif' }}>${tier.price}</span>
-      <span style={{ color: '#556080', fontSize: 13 }}>/mo</span>
-    </div>
-    <div style={{ color: '#556080', fontSize: 12, marginBottom: 24 }}>{tier.desc}</div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
-      {tier.features.map((f: string, i: number) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <span style={{ color: '#00C97A', fontSize: 14, marginTop: 1 }}>✓</span>
-          <span style={{ color: '#8899b4', fontSize: 13, lineHeight: 1.4 }}>{f}</span>
-        </div>
-      ))}
-      {tier.excluded?.map((f: string, i: number) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, opacity: 0.4 }}>
-          <span style={{ color: '#556080', fontSize: 14, marginTop: 1 }}>✗</span>
-          <span style={{ color: '#556080', fontSize: 13, lineHeight: 1.4 }}>{f}</span>
-        </div>
-      ))}
-    </div>
-    <button onClick={onSelect} style={{
-      width: '100%', padding: '12px 0',
-      background: tier.featured ? '#00C97A' : 'transparent',
-      color: tier.featured ? '#000' : '#00C97A',
-      border: `1.5px solid ${tier.featured ? '#00C97A' : '#00C97A'}`,
-      borderRadius: 8, fontSize: 13, fontWeight: 700,
-      letterSpacing: '.06em', textTransform: 'uppercase',
-      cursor: 'pointer', transition: 'all 0.2s',
-    }}
-    onMouseEnter={e => {
-      (e.currentTarget as HTMLElement).style.background = '#00C97A';
-      (e.currentTarget as HTMLElement).style.color = '#000';
-    }}
-    onMouseLeave={e => {
-      if (!tier.featured) {
-        (e.currentTarget as HTMLElement).style.background = 'transparent';
-        (e.currentTarget as HTMLElement).style.color = '#00C97A';
-      }
-    }}>
-      {tier.cta}
-    </button>
-  </div>
-);
-};
+
 const Feature = ({ icon, title, desc }: any) => (
   <div style={{
     padding: '28px 24px', borderRadius: 12,
@@ -169,57 +88,6 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const tiers = [
-    {
-      name: 'Beta',
-      price: 0,
-      desc: '21 days free — no credit card required',
-      cta: 'Join Beta Free →',
-      featured: true,
-      badge: '🎉 Limited Time',
-      features: [
-        'Unlimited trades — auto-synced via MT5 EA',
-        'Unlimited manual setup tagging',
-        'Unlimited auto session tagging',
-        'Unlimited auto behaviour tagging',
-        'Screenshots always stored',
-        'AI structural analysis — up to 5 trades/day',
-        'Trading DNA after 50 trades',
-        'Weekly AI behavioural insights',
-        'Dashboard, calendar, plan & performance',
-        '1 account',
-      ],
-    },
-    {
-      name: 'Journal',
-      price: 9,
-      desc: 'Unlimited journalling with weekly AI insights',
-      cta: 'Start at $9/mo',
-      featured: false,
-      features: [
-        'Unlimited trades — auto-synced via MT5 EA',
-        'Unlimited manual setup tagging',
-        'Unlimited auto session tagging',
-        'Unlimited auto behaviour tagging',
-        'Screenshots always stored',
-        'Dashboard, calendar, performance reports',
-        'Weekly AI behavioural insights',
-        'Plan & Edge tracker · 1 account',
-      ],
-      excluded: [
-        'AI structural analysis',
-      ],
-    },
-    {
-      name: 'More plans',
-      price: null,
-      desc: 'Higher AI analysis limits — coming soon',
-      cta: null,
-      featured: false,
-      locked: true,
-      features: [],
-    },
-  ];
 
   const features = [
     {
@@ -492,35 +360,33 @@ export default function Landing() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" style={{ padding: '100px 48px', borderTop: '1px solid #1a1f30' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
-            <div style={{ fontSize: 11, color: '#00C97A', textTransform: 'uppercase',
-              letterSpacing: '.12em', marginBottom: 12 }}>Pricing</div>
-            <h2 style={{ fontSize: 40, fontWeight: 700, fontFamily: 'Georgia, serif',
-              marginBottom: 16 }}>Transparent pricing — unlimited journalling on every plan</h2>
-            <p style={{ color: '#556080', fontSize: 14 }}>Screenshots always stored. AI analysis scales with your plan. Cancel anytime.</p>
+      <section id="pricing" style={{ padding: '80px 48px', borderTop: '1px solid #1a1f30' }}>
+        <div style={{ maxWidth: 580, margin: '0 auto', textAlign: 'center' as const }}>
+          <div style={{ fontSize:11, color:'#00C97A', textTransform:'uppercase' as const,
+            letterSpacing:'.12em', marginBottom:12, fontWeight:700 }}>Beta Launch</div>
+          <h2 style={{ fontSize:36, fontWeight:700, fontFamily:'Georgia,serif',
+            color:'#E8ECF4', marginBottom:16, lineHeight:1.2 }}>
+            Free during beta
+          </h2>
+          <p style={{ color:'#556080', fontSize:14, lineHeight:1.8, marginBottom:8 }}>
+            Join now and get 21 days of full access — no credit card required.
+          </p>
+          <div style={{ display:'flex', justifyContent:'center', gap:20,
+            flexWrap:'wrap' as const, fontSize:13, color:'#8899b4', marginBottom:32 }}>
+            <span>✓ Unlimited journalling</span>
+            <span>✓ AI analysis — 5 trades/day</span>
+            <span>✓ Weekly behavioural insights</span>
+            <span>✓ 1 account</span>
           </div>
-          {/* Beta callout */}
-          <div style={{ background:'rgba(0,201,122,.06)', border:'1px solid rgba(0,201,122,.2)',
-            borderRadius:10, padding:'20px 28px', marginBottom:32, textAlign:'center' as const }}>
-            <span style={{ fontSize:11, fontWeight:700, color:'#00C97A',
-              textTransform:'uppercase' as const, letterSpacing:'.1em' }}>
-              🎉 Beta Launch — Now Open
-            </span>
-            <p style={{ fontSize:14, color:'#E8ECF4', margin:'8px 0 4px', fontWeight:600 }}>
-              Join during beta and get 21 days free — no credit card required
-            </p>
-            <p style={{ fontSize:12, color:'#556080', margin:0 }}>
-              Unlimited journalling · AI analysis up to 5 trades/day · Weekly behavioural insights · 1 account
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, alignItems: 'start' }}>
-            {tiers.map((tier, i) => (
-              <TierCard key={i} tier={tier} onSelect={() => navigate('/register')} />
-            ))}
-          </div>
+          <button onClick={() => { window.location.href='/register'; }} style={{
+            padding:'14px 44px', background:'#00C97A', border:'none',
+            borderRadius:8, color:'#000', fontSize:14, fontWeight:700,
+            cursor:'pointer', letterSpacing:'.06em',
+            boxShadow:'0 0 32px rgba(0,201,122,0.2)',
+          }}>Join Beta — Free →</button>
+          <p style={{ fontSize:11, color:'#3a4560', marginTop:14 }}>
+            Paid plans coming soon · Pricing announced after beta
+          </p>
         </div>
       </section>
 
