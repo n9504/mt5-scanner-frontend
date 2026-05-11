@@ -115,7 +115,6 @@ export default function PlanPage() {
   const bottomSymbols = symStats.filter(s => s.wr < 40).slice(0,2);
 
   const fmtPnl  = (v: number) => v >= 0 ? `+$${v.toFixed(2)}` : `-$${Math.abs(v).toFixed(2)}`;
-  const fmtPct  = (v: number) => `${v}%`;
 
   const generatePlan = async () => {
     setGenerating(true);
@@ -213,7 +212,16 @@ export default function PlanPage() {
                     </td>
                   </tr>
                 )}
-                <PlanRow label="Win Rate"     planned={todayPlan.planned_wr}       actual={todayPlan.actual_wr}        format={fmtPct} />
+                <tr style={{ borderBottom:'1px solid #111626' }}>
+                  <td style={{ padding:'12px 16px', fontSize:12, color:'#8899b4', fontWeight:500 }}>Win Rate</td>
+                  <td style={{ padding:'12px 16px', fontSize:12, color:'#556080', textAlign:'right' as const }}>—</td>
+                  <td style={{ padding:'12px 16px', fontSize:13, fontWeight:700,
+                    color: todayPlan.actual_wr >= 50 ? '#00C97A' : '#f04060',
+                    textAlign:'right' as const }}>
+                    {todayPlan.actual_wr}%
+                  </td>
+                  <td />
+                </tr>
                 <tr style={{ background:'#070b14' }}>
                   <td colSpan={2} style={{ padding:'10px 16px', fontSize:11, color:'#556080' }}>
                     {todayPlan.actual_wins}W · {todayPlan.actual_losses}L today
