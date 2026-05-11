@@ -20,6 +20,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlanRow({ label, planned, actual, format, status }: any) {
   const isGood = actual !== null && planned !== null && (
     (label === 'Max Loss' && Math.abs(actual) <= Math.abs(planned)) ||
